@@ -162,7 +162,3 @@ book-viewer/
 ## ライセンス
 
 MIT License
-
-## 作者
-
-hatohato25@gmail.com
