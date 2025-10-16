@@ -1,0 +1,392 @@
+// PDFビューアーモジュール
+// このファイルで定義された関数は、グローバルスコープで他のモジュールから参照されます
+
+// PDFビューアーの初期化（app.jsから呼び出し）
+// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
+function initPdfViewer() {
+  // 初期化時は何もしない（PDF読み込み時にイベントを設定）
+}
+
+// クリック領域のハンドラー（PDF用）
+function handlePdfClickPrev() {
+  navigatePdfPage(2); // 右側をクリック → 次のページ
+  showControls();
+}
+
+function handlePdfClickNext() {
+  navigatePdfPage(-2); // 左側をクリック → 前のページ
+  showControls();
+}
+
+// イベントリスナーの初期化
+// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
+function setupPdfViewerEvents() {
+  // クリック領域（ページ遷移とコントロール表示）
+  // PDFは左から右に読むため、左=前、右=次
+  // CSSでは click-area-prev=右側、click-area-next=左側のため、逆に設定
+  elements.clickAreaPrev.addEventListener("click", handlePdfClickPrev);
+  elements.clickAreaNext.addEventListener("click", handlePdfClickNext);
+
+  // リセットボタン
+  elements.btnReset.addEventListener("click", resetPdfViewer);
+
+  // 見開き調整ボタン
+  elements.btnOffset.addEventListener("click", togglePdfOffset);
+
+  // キーボード操作
+  document.addEventListener("keydown", handlePdfKeydown);
+
+  // ページコンテナクリックで表示
+  const pageContainer = document.querySelector(".page-container");
+  pageContainer.addEventListener("click", showControls);
+
+  // コントロール領域での操作時はタイマーをリセット
+  elements.bottomControls.addEventListener("mouseenter", keepControlsVisible);
+  elements.bottomControls.addEventListener("mousemove", keepControlsVisible);
+  elements.btnReset.addEventListener("mouseenter", keepControlsVisible);
+  elements.btnOffset.addEventListener("mouseenter", keepControlsVisible);
+
+  // シークバー操作
+  elements.seekbar.addEventListener("input", handlePdfSeekbarInput);
+  elements.seekbar.addEventListener("change", handlePdfSeekbarChange);
+
+  // ドキュメント全体でクリックを監視
+  document.addEventListener("click", handleDocumentClick);
+}
+
+// イベントリスナーの削除
+function removePdfViewerEvents() {
+  // クリック領域のイベントリスナーを削除
+  elements.clickAreaPrev.removeEventListener("click", handlePdfClickPrev);
+  elements.clickAreaNext.removeEventListener("click", handlePdfClickNext);
+
+  // リセットボタン
+  elements.btnReset.removeEventListener("click", resetPdfViewer);
+
+  // 見開き調整ボタン
+  elements.btnOffset.removeEventListener("click", togglePdfOffset);
+
+  // キーボード操作
+  document.removeEventListener("keydown", handlePdfKeydown);
+
+  // ページコンテナ
+  const pageContainer = document.querySelector(".page-container");
+  if (pageContainer) {
+    pageContainer.removeEventListener("click", showControls);
+  }
+
+  // コントロール領域
+  elements.bottomControls.removeEventListener(
+    "mouseenter",
+    keepControlsVisible,
+  );
+  elements.bottomControls.removeEventListener("mousemove", keepControlsVisible);
+  elements.btnReset.removeEventListener("mouseenter", keepControlsVisible);
+  elements.btnOffset.removeEventListener("mouseenter", keepControlsVisible);
+
+  // シークバー操作
+  elements.seekbar.removeEventListener("input", handlePdfSeekbarInput);
+  elements.seekbar.removeEventListener("change", handlePdfSeekbarChange);
+
+  // ドキュメント全体
+  document.removeEventListener("click", handleDocumentClick);
+}
+
+// PDFを読み込む（app.jsから呼び出し）
+// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
+async function loadPdf(file) {
+  try {
+    // PDF.jsを使用してPDFを読み込む
+    const arrayBuffer = await file.arrayBuffer();
+    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+    const pdf = await loadingTask.promise;
+
+    // すべてのページをCanvasとしてレンダリング
+    const pages = [];
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      // ビューポートを設定（スケール2でより高解像度に）
+      const viewport = page.getViewport({ scale: 2 });
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      // ページをレンダリング
+      await page.render({
+        canvasContext: context,
+        viewport: viewport,
+      }).promise;
+
+      // CanvasをBlob URLに変換
+      const blob = await new Promise((resolve) => {
+        canvas.toBlob(resolve, "image/png");
+      });
+      const url = URL.createObjectURL(blob);
+      pages.push(url);
+    }
+
+    // 既存の画像URLを解放
+    state.images.forEach((url) => {
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+    });
+
+    state.images = pages;
+    state.currentPage = 0;
+    state.offsetEnabled = false;
+    state.totalPages = Math.ceil(state.images.length / 2);
+
+    // シークバーを初期化
+    elements.seekbar.max = state.totalPages;
+    elements.seekbar.value = 1;
+    elements.seekbarTotal.textContent = state.totalPages;
+
+    // 見開き調整ボタンの状態をリセット
+    elements.btnOffset.classList.remove("active");
+
+    // シークバーを左から右（LTR）に設定
+    elements.seekbar.style.direction = "ltr";
+
+    // ページコンテナを左から右（row）に設定
+    const pageContainer = document.querySelector(".page-container");
+    pageContainer.style.flexDirection = "row";
+
+    // UIを更新
+    elements.dropZone.classList.add("hidden");
+    elements.viewer.classList.remove("hidden");
+
+    updatePdfPageDisplay();
+  } catch (error) {
+    console.error("[PDF] PDF読み込みエラー:", error);
+    alert("PDFの読み込みに失敗しました。");
+  }
+}
+
+// 見開き調整を切り替える
+function togglePdfOffset() {
+  const currentPageNumber = Math.floor(state.currentPage / 2) + 1;
+
+  if (state.offsetEnabled) {
+    // オフにする：先頭の空要素を削除
+    state.images.shift();
+    state.offsetEnabled = false;
+    elements.btnOffset.classList.remove("active");
+
+    // 現在のページ番号を維持
+    state.currentPage = (currentPageNumber - 1) * 2;
+  } else {
+    // オンにする：先頭に空要素を挿入
+    state.images.unshift(null);
+    state.offsetEnabled = true;
+    elements.btnOffset.classList.add("active");
+
+    // 現在のページ番号を維持
+    state.currentPage = (currentPageNumber - 1) * 2;
+  }
+
+  // ページ数を再計算
+  state.totalPages = Math.ceil(state.images.length / 2);
+  elements.seekbar.max = state.totalPages;
+  elements.seekbarTotal.textContent = state.totalPages;
+
+  // 表示を更新
+  updatePdfPageDisplay();
+}
+
+// 画像を確実に読み込んで表示する
+function loadAndDisplayPdfImage(imgElement, url) {
+  return new Promise((resolve, reject) => {
+    // イベントハンドラをクリーンアップする関数
+    const cleanup = () => {
+      imgElement.onload = null;
+      imgElement.onerror = null;
+    };
+
+    // onload/onerrorを設定
+    imgElement.onload = () => {
+      cleanup();
+      imgElement.classList.remove("hidden");
+      resolve();
+    };
+
+    imgElement.onerror = (e) => {
+      cleanup();
+      console.error("[PDF Display] 画像読み込みエラー:", url);
+      imgElement.classList.add("hidden");
+      reject(e);
+    };
+
+    // すでにキャッシュされている場合の対応
+    if (
+      imgElement.complete &&
+      imgElement.naturalWidth > 0 &&
+      imgElement.src === url
+    ) {
+      cleanup();
+      imgElement.classList.remove("hidden");
+      resolve();
+      return;
+    }
+
+    // srcを設定
+    imgElement.src = url;
+  });
+}
+
+// ページ表示を更新（左から右の読み順）
+async function updatePdfPageDisplay() {
+  // PDFは左から右に読む
+  // CSSで flex-direction: row を使用しているため、
+  // DOM上の page-right, page-left の順がそのまま画面の左→右に表示される
+  // したがって、page-right に左側のページ、page-left に右側のページを割り当てる
+  const leftPageIndex = state.currentPage; // 左側に表示するページ（1,3,5...）
+  const rightPageIndex = state.currentPage + 1; // 右側に表示するページ（2,4,6...）
+
+  // 左側に表示（elements.pageRight に割り当て）
+  if (leftPageIndex < state.images.length) {
+    const leftPageImage = state.images[leftPageIndex];
+    if (leftPageImage === null) {
+      // 空要素の場合は非表示
+      elements.pageRight.classList.add("hidden");
+      elements.pageRight.src = "";
+    } else {
+      try {
+        await loadAndDisplayPdfImage(elements.pageRight, leftPageImage);
+      } catch {
+        // エラー時は非表示にする
+        elements.pageRight.classList.add("hidden");
+        elements.pageRight.src = "";
+      }
+    }
+  } else {
+    elements.pageRight.classList.add("hidden");
+    elements.pageRight.src = "";
+  }
+
+  // 右側に表示（elements.pageLeft に割り当て）
+  if (rightPageIndex < state.images.length) {
+    const rightPageImage = state.images[rightPageIndex];
+    if (rightPageImage === null) {
+      // 空要素の場合は非表示
+      elements.pageLeft.classList.add("hidden");
+      elements.pageLeft.src = "";
+    } else {
+      try {
+        await loadAndDisplayPdfImage(elements.pageLeft, rightPageImage);
+      } catch {
+        // エラー時は非表示にする
+        elements.pageLeft.classList.add("hidden");
+        elements.pageLeft.src = "";
+      }
+    }
+  } else {
+    elements.pageLeft.classList.add("hidden");
+    elements.pageLeft.src = "";
+  }
+
+  // ページ情報を更新
+  const currentPageNumber = Math.floor(state.currentPage / 2) + 1;
+
+  // シークバーを更新
+  elements.seekbar.value = currentPageNumber;
+  elements.seekbarCurrent.textContent = currentPageNumber;
+
+  // クリック領域の表示/非表示を更新
+  // PDFは左から右に読むため、画像ビューアと逆
+  // 最初のページ：左側（次へ）を非表示
+  if (state.currentPage <= 0) {
+    elements.clickAreaNext.classList.add("hidden");
+  } else {
+    elements.clickAreaNext.classList.remove("hidden");
+  }
+
+  // 最後のページ：右側（前へ）を非表示
+  if (state.currentPage + 2 >= state.images.length) {
+    elements.clickAreaPrev.classList.add("hidden");
+  } else {
+    elements.clickAreaPrev.classList.remove("hidden");
+  }
+}
+
+// ページ遷移
+function navigatePdfPage(delta) {
+  const newPage = state.currentPage + delta;
+
+  if (newPage < 0) {
+    state.currentPage = 0;
+  } else if (newPage >= state.images.length) {
+    state.currentPage = Math.max(0, state.images.length - 2);
+  } else {
+    state.currentPage = newPage;
+  }
+
+  updatePdfPageDisplay();
+}
+
+// キーボード操作（左から右の読み順）
+function handlePdfKeydown(e) {
+  if (elements.viewer.classList.contains("hidden")) return;
+
+  switch (e.key) {
+    case "ArrowLeft":
+      navigatePdfPage(-2); // 前のページ
+      break;
+    case "ArrowRight":
+      navigatePdfPage(2); // 次のページ
+      break;
+  }
+}
+
+// ビューアをリセット
+function resetPdfViewer() {
+  // イベントリスナーを削除
+  removePdfViewerEvents();
+
+  // 画像URLを解放
+  state.images.forEach((url) => {
+    if (url) {
+      URL.revokeObjectURL(url);
+    }
+  });
+
+  // 状態をリセット
+  state.images = [];
+  state.currentPage = 0;
+  state.totalPages = 0;
+
+  // UIをリセット
+  elements.viewer.classList.add("hidden");
+  elements.dropZone.classList.remove("hidden");
+  elements.pageRight.src = "";
+  elements.pageLeft.src = "";
+
+  // シークバーを元の設定（RTL）に戻す
+  elements.seekbar.style.direction = "rtl";
+
+  // ページコンテナを元の設定（row-reverse）に戻す
+  const pageContainer = document.querySelector(".page-container");
+  pageContainer.style.flexDirection = "row-reverse";
+
+  // シークバーとリセットボタンを非表示
+  elements.seekbarContainer.classList.add("hidden");
+  elements.btnOffset.classList.add("hidden");
+  elements.btnReset.classList.add("hidden");
+  elements.bottomControls.classList.remove("visible");
+}
+
+// シークバーの入力処理（リアルタイム更新）
+function handlePdfSeekbarInput(e) {
+  const pageNumber = Number.parseInt(e.target.value, 10);
+  elements.seekbarCurrent.textContent = pageNumber;
+}
+
+// シークバーの変更処理（ページ遷移）
+function handlePdfSeekbarChange(e) {
+  const pageNumber = Number.parseInt(e.target.value, 10);
+  const newPage = (pageNumber - 1) * 2; // ページ番号からインデックスに変換
+  state.currentPage = Math.max(0, Math.min(newPage, state.images.length - 1));
+  updatePdfPageDisplay();
+}

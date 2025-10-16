@@ -1,0 +1,403 @@
+// 画像ビューアーモジュール
+// このファイルで定義された関数は、グローバルスコープで他のモジュールから参照されます
+
+// 画像ビューアーの初期化（app.jsから呼び出し）
+// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
+function initImageViewer() {
+  // 初期化時は何もしない（画像読み込み時にイベントを設定）
+}
+
+// クリック領域のハンドラー（画像用）
+function handleImageClickPrev() {
+  navigatePage(-2);
+  showControls();
+}
+
+function handleImageClickNext() {
+  navigatePage(2);
+  showControls();
+}
+
+// イベントリスナーの初期化
+// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
+function setupImageViewerEvents() {
+  // クリック領域のイベントリスナーを登録
+  elements.clickAreaPrev.addEventListener("click", handleImageClickPrev);
+  elements.clickAreaNext.addEventListener("click", handleImageClickNext);
+
+  // リセットボタン
+  elements.btnReset.addEventListener("click", resetViewer);
+
+  // 見開き調整ボタン
+  elements.btnOffset.addEventListener("click", toggleOffset);
+
+  // キーボード操作
+  document.addEventListener("keydown", handleKeydown);
+
+  // ページコンテナクリックで表示
+  const pageContainer = document.querySelector(".page-container");
+  pageContainer.addEventListener("click", showControls);
+
+  // コントロール領域での操作時はタイマーをリセット
+  elements.bottomControls.addEventListener("mouseenter", keepControlsVisible);
+  elements.bottomControls.addEventListener("mousemove", keepControlsVisible);
+  elements.btnReset.addEventListener("mouseenter", keepControlsVisible);
+  elements.btnOffset.addEventListener("mouseenter", keepControlsVisible);
+
+  // シークバー操作
+  elements.seekbar.addEventListener("input", handleSeekbarInput);
+  elements.seekbar.addEventListener("change", handleSeekbarChange);
+
+  // ドキュメント全体でクリックを監視
+  document.addEventListener("click", handleDocumentClick);
+}
+
+// イベントリスナーの削除
+function removeImageViewerEvents() {
+  // クリック領域のイベントリスナーを削除
+  elements.clickAreaPrev.removeEventListener("click", handleImageClickPrev);
+  elements.clickAreaNext.removeEventListener("click", handleImageClickNext);
+
+  // リセットボタン
+  elements.btnReset.removeEventListener("click", resetViewer);
+
+  // 見開き調整ボタン
+  elements.btnOffset.removeEventListener("click", toggleOffset);
+
+  // キーボード操作
+  document.removeEventListener("keydown", handleKeydown);
+
+  // ページコンテナ
+  const pageContainer = document.querySelector(".page-container");
+  if (pageContainer) {
+    pageContainer.removeEventListener("click", showControls);
+  }
+
+  // コントロール領域
+  elements.bottomControls.removeEventListener(
+    "mouseenter",
+    keepControlsVisible,
+  );
+  elements.bottomControls.removeEventListener("mousemove", keepControlsVisible);
+  elements.btnReset.removeEventListener("mouseenter", keepControlsVisible);
+  elements.btnOffset.removeEventListener("mouseenter", keepControlsVisible);
+
+  // シークバー操作
+  elements.seekbar.removeEventListener("input", handleSeekbarInput);
+  elements.seekbar.removeEventListener("change", handleSeekbarChange);
+
+  // ドキュメント全体
+  document.removeEventListener("click", handleDocumentClick);
+}
+
+// 画像を読み込む（app.jsから呼び出し）
+// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
+async function loadImages(files) {
+  // 既存の画像URLを解放
+  state.images.forEach((url) => {
+    if (url) {
+      URL.revokeObjectURL(url);
+    }
+  });
+
+  state.images = [];
+
+  for (const file of files) {
+    const url = URL.createObjectURL(file);
+    state.images.push(url);
+  }
+
+  state.currentPage = 0;
+  state.offsetEnabled = false; // 見開き調整をリセット
+  state.totalPages = Math.ceil(state.images.length / 2);
+
+  // シークバーを初期化
+  elements.seekbar.max = state.totalPages;
+  elements.seekbar.value = 1;
+  elements.seekbarTotal.textContent = state.totalPages;
+
+  // 見開き調整ボタンの状態をリセット
+  elements.btnOffset.classList.remove("active");
+
+  // シークバーを右から左（RTL）に設定
+  elements.seekbar.style.direction = "rtl";
+
+  // ページコンテナを右から左（row-reverse）に設定
+  const pageContainer = document.querySelector(".page-container");
+  pageContainer.style.flexDirection = "row-reverse";
+
+  // UIを更新
+  elements.dropZone.classList.add("hidden");
+  elements.viewer.classList.remove("hidden");
+
+  updatePageDisplay();
+}
+
+// 見開き調整を切り替える
+function toggleOffset() {
+  const currentPageNumber = Math.floor(state.currentPage / 2) + 1;
+
+  if (state.offsetEnabled) {
+    // オフにする：先頭の空要素を削除
+    state.images.shift();
+    state.offsetEnabled = false;
+    elements.btnOffset.classList.remove("active");
+
+    // 現在のページ番号を維持
+    state.currentPage = (currentPageNumber - 1) * 2;
+  } else {
+    // オンにする：先頭に空要素を挿入
+    state.images.unshift(null);
+    state.offsetEnabled = true;
+    elements.btnOffset.classList.add("active");
+
+    // 現在のページ番号を維持
+    state.currentPage = (currentPageNumber - 1) * 2;
+  }
+
+  // ページ数を再計算
+  state.totalPages = Math.ceil(state.images.length / 2);
+  elements.seekbar.max = state.totalPages;
+  elements.seekbarTotal.textContent = state.totalPages;
+
+  // 表示を更新
+  updatePageDisplay();
+}
+
+// 画像を確実に読み込んで表示する
+function loadAndDisplayImage(imgElement, url) {
+  return new Promise((resolve, reject) => {
+    // イベントハンドラをクリーンアップする関数
+    const cleanup = () => {
+      imgElement.onload = null;
+      imgElement.onerror = null;
+    };
+
+    // onload/onerrorを設定
+    imgElement.onload = () => {
+      cleanup();
+      imgElement.classList.remove("hidden");
+      resolve();
+    };
+
+    imgElement.onerror = (e) => {
+      cleanup();
+      console.error("[Display] 画像読み込みエラー:", url);
+      imgElement.classList.add("hidden");
+      reject(e);
+    };
+
+    // すでにキャッシュされている場合の対応
+    if (
+      imgElement.complete &&
+      imgElement.naturalWidth > 0 &&
+      imgElement.src === url
+    ) {
+      cleanup();
+      imgElement.classList.remove("hidden");
+      resolve();
+      return;
+    }
+
+    // srcを設定
+    imgElement.src = url;
+  });
+}
+
+// ページ表示を更新
+async function updatePageDisplay() {
+  const rightIndex = state.currentPage;
+  const leftIndex = state.currentPage + 1;
+
+  // 右ページの読み込みと表示
+  if (rightIndex < state.images.length) {
+    const rightImage = state.images[rightIndex];
+    if (rightImage === null) {
+      // 空要素の場合は非表示
+      elements.pageRight.classList.add("hidden");
+      elements.pageRight.src = "";
+    } else {
+      try {
+        await loadAndDisplayImage(elements.pageRight, rightImage);
+      } catch {
+        // エラー時は非表示にする
+        elements.pageRight.classList.add("hidden");
+        elements.pageRight.src = "";
+      }
+    }
+  } else {
+    elements.pageRight.classList.add("hidden");
+    elements.pageRight.src = "";
+  }
+
+  // 左ページの読み込みと表示
+  if (leftIndex < state.images.length) {
+    const leftImage = state.images[leftIndex];
+    if (leftImage === null) {
+      // 空要素の場合は非表示
+      elements.pageLeft.classList.add("hidden");
+      elements.pageLeft.src = "";
+    } else {
+      try {
+        await loadAndDisplayImage(elements.pageLeft, leftImage);
+      } catch {
+        // エラー時は非表示にする
+        elements.pageLeft.classList.add("hidden");
+        elements.pageLeft.src = "";
+      }
+    }
+  } else {
+    elements.pageLeft.classList.add("hidden");
+    elements.pageLeft.src = "";
+  }
+
+  // ページ情報を更新
+  const currentPageNumber = Math.floor(state.currentPage / 2) + 1;
+
+  // シークバーを更新
+  elements.seekbar.value = currentPageNumber;
+  elements.seekbarCurrent.textContent = currentPageNumber;
+
+  // クリック領域の表示/非表示を更新
+  // 最初のページ：前のページ領域を非表示
+  if (state.currentPage <= 0) {
+    elements.clickAreaPrev.classList.add("hidden");
+  } else {
+    elements.clickAreaPrev.classList.remove("hidden");
+  }
+
+  // 最後のページ：次のページ領域を非表示
+  if (state.currentPage + 2 >= state.images.length) {
+    elements.clickAreaNext.classList.add("hidden");
+  } else {
+    elements.clickAreaNext.classList.remove("hidden");
+  }
+}
+
+// ページ遷移
+function navigatePage(delta) {
+  const newPage = state.currentPage + delta;
+
+  if (newPage < 0) {
+    state.currentPage = 0;
+  } else if (newPage >= state.images.length) {
+    state.currentPage = Math.max(0, state.images.length - 2);
+  } else {
+    state.currentPage = newPage;
+  }
+
+  updatePageDisplay();
+}
+
+// キーボード操作
+function handleKeydown(e) {
+  if (elements.viewer.classList.contains("hidden")) return;
+
+  switch (e.key) {
+    case "ArrowLeft":
+      navigatePage(2); // 次のページ（右から左に読むため）
+      break;
+    case "ArrowRight":
+      navigatePage(-2); // 前のページ
+      break;
+  }
+}
+
+// ビューアをリセット
+function resetViewer() {
+  // イベントリスナーを削除
+  removeImageViewerEvents();
+
+  // 画像URLを解放
+  state.images.forEach((url) => {
+    if (url) {
+      URL.revokeObjectURL(url);
+    }
+  });
+
+  // 状態をリセット
+  state.images = [];
+  state.currentPage = 0;
+  state.totalPages = 0;
+
+  // UIをリセット
+  elements.viewer.classList.add("hidden");
+  elements.dropZone.classList.remove("hidden");
+  elements.pageRight.src = "";
+  elements.pageLeft.src = "";
+
+  // シークバーとリセットボタンを非表示
+  elements.seekbarContainer.classList.add("hidden");
+  elements.btnOffset.classList.add("hidden");
+  elements.btnReset.classList.add("hidden");
+  elements.bottomControls.classList.remove("visible");
+}
+
+// コントロール（シークバーとリセットボタン）を表示
+function showControls() {
+  // タイマーをクリア
+  if (seekbarHideTimer) {
+    clearTimeout(seekbarHideTimer);
+    seekbarHideTimer = null;
+  }
+
+  // コントロールを表示
+  elements.bottomControls.classList.add("visible");
+  elements.seekbarContainer.classList.remove("hidden");
+  elements.btnOffset.classList.remove("hidden");
+  elements.btnReset.classList.remove("hidden");
+
+  // 3秒後に自動非表示
+  startHideTimer();
+}
+
+// コントロールを表示状態に保つ
+function keepControlsVisible() {
+  // タイマーをリセット
+  if (seekbarHideTimer) {
+    clearTimeout(seekbarHideTimer);
+  }
+  startHideTimer();
+}
+
+// 非表示タイマーを開始
+function startHideTimer() {
+  seekbarHideTimer = setTimeout(() => {
+    hideControls();
+  }, 3000);
+}
+
+// コントロールを非表示
+function hideControls() {
+  elements.bottomControls.classList.remove("visible");
+  elements.seekbarContainer.classList.add("hidden");
+  elements.btnOffset.classList.add("hidden");
+  elements.btnReset.classList.add("hidden");
+}
+
+// ドキュメントクリック処理
+function handleDocumentClick(e) {
+  // コントロール領域、ページコンテナ、クリック領域以外をクリックした場合は非表示
+  if (
+    !elements.bottomControls.contains(e.target) &&
+    !elements.btnReset.contains(e.target) &&
+    !e.target.closest(".page-container") &&
+    !e.target.closest(".click-area")
+  ) {
+    hideControls();
+  }
+}
+
+// シークバーの入力処理（リアルタイム更新）
+function handleSeekbarInput(e) {
+  const pageNumber = Number.parseInt(e.target.value, 10);
+  elements.seekbarCurrent.textContent = pageNumber;
+}
+
+// シークバーの変更処理（ページ遷移）
+function handleSeekbarChange(e) {
+  const pageNumber = Number.parseInt(e.target.value, 10);
+  const newPage = (pageNumber - 1) * 2; // ページ番号からインデックスに変換
+  state.currentPage = Math.max(0, Math.min(newPage, state.images.length - 1));
+  updatePageDisplay();
+}

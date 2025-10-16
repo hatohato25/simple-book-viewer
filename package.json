@@ -1,0 +1,25 @@
+{
+  "name": "book-viewer",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "author": "hatohato25@gmail.com",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server -p 8080 -c-1 -o",
+    "lint": "npx @biomejs/biome lint --write",
+    "format": "npx @biomejs/biome format --write",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.5",
+    "@vitest/ui": "^2.1.9",
+    "happy-dom": "^20.0.0",
+    "http-server": "^14.1.1",
+    "jsdom": "^27.0.0",
+    "vitest": "^2.1.9"
+  }
+}

@@ -1,0 +1,323 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+/* ドロップゾーン */
+.drop-zone {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px dashed #666;
+  background-color: #2a2a2a;
+  transition: all 0.3s ease;
+}
+
+.drop-zone.hidden {
+  display: none;
+}
+
+.drop-zone.dragover {
+  border-color: #4caf50;
+  background-color: #333;
+}
+
+.drop-zone-content {
+  text-align: center;
+  pointer-events: none;
+}
+
+.drop-zone-content p {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.drop-zone-content .hint {
+  font-size: 1rem;
+  color: #888;
+}
+
+/* ビューア */
+.viewer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #1a1a1a;
+}
+
+.viewer.hidden {
+  display: none;
+}
+
+.viewer-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  padding: 20px;
+  position: relative; /* クリック領域の配置のため */
+}
+
+.page-container {
+  display: flex;
+  flex-direction: row-reverse; /* 右ページを右側に、左ページを左側に */
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.page {
+  flex: 0 1 auto;
+  max-width: 50%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.page.hidden {
+  display: none;
+}
+
+/* クリック領域 */
+.click-area {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 25%; /* 画面の25%幅 */
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.2s ease;
+}
+
+.click-area:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.click-area-prev {
+  right: 0; /* 右側：前のページ */
+}
+
+.click-area-next {
+  left: 0; /* 左側：次のページ */
+}
+
+.click-area.hidden {
+  display: none;
+}
+
+/* 下部コントロール */
+.bottom-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.bottom-controls.visible {
+  opacity: 1;
+  pointer-events: auto;
+  background-color: rgba(42, 42, 42, 0.9);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* 見開き調整ボタン */
+.btn-offset {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background-color: rgba(66, 66, 66, 0.9);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-offset:hover {
+  background-color: rgba(88, 88, 88, 0.9);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-offset.active {
+  background-color: rgba(33, 150, 243, 0.9);
+  border-color: rgba(33, 150, 243, 0.5);
+}
+
+.btn-offset.active:hover {
+  background-color: rgba(25, 118, 210, 0.9);
+  border-color: rgba(25, 118, 210, 0.5);
+}
+
+.btn-offset.hidden {
+  display: none;
+}
+
+/* シークバー */
+.seekbar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  opacity: 1;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.seekbar-container.hidden {
+  opacity: 0;
+  transform: scaleX(0);
+  width: 0;
+  overflow: hidden;
+}
+
+.seekbar {
+  width: 250px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  direction: rtl; /* 右から左へ進行 */
+}
+
+.seekbar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4caf50;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.seekbar::-webkit-slider-thumb:hover {
+  background: #45a049;
+}
+
+.seekbar::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4caf50;
+  cursor: pointer;
+  border: none;
+  transition: background 0.3s ease;
+}
+
+.seekbar::-moz-range-thumb:hover {
+  background: #45a049;
+}
+
+.seekbar-label {
+  font-size: 0.9rem;
+  color: #aaaaaa;
+  text-align: center;
+}
+
+/* リセットボタン */
+.btn-reset {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem 1.5rem;
+  font-size: 0.95rem;
+  background-color: rgba(42, 42, 42, 0.9);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    background-color 0.3s ease;
+  z-index: 20;
+  opacity: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-reset:hover {
+  background-color: rgba(244, 67, 54, 0.9);
+  border-color: rgba(244, 67, 54, 0.5);
+}
+
+.btn-reset.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-10px);
+  pointer-events: none;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .page-container {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .page {
+    max-width: 90%;
+    max-height: 45vh;
+  }
+
+  .click-area {
+    width: 30%; /* モバイルでは少し広め */
+  }
+
+  .bottom-controls {
+    bottom: 10px;
+    padding: 0.5rem 1rem;
+  }
+
+  .btn-reset {
+    top: 10px;
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .drop-zone-content p {
+    font-size: 1.2rem;
+  }
+
+  .drop-zone-content .hint {
+    font-size: 0.9rem;
+  }
+}
