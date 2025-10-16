@@ -2,6 +2,11 @@
 
 ブラウザで利用できるシンプルな電子書籍ビューアー。画像ファイルやPDFファイルを見開き表示できます。
 
+## [DEMO](https://hatohato25.github.io/simple-book-viewer/)
+<img width="1668" height="1293" alt="スクリーンショット 2025-10-17 3 38 05" src="https://github.com/user-attachments/assets/e0acf720-520c-49f8-acf2-b4ba96f0325f" style="width: 40%;" />
+<img width="1655" height="1289" alt="スクリーンショット 2025-10-17 3 42 02" src="https://github.com/user-attachments/assets/9fe346db-04ec-4a8d-b91c-135702ca3abf" style="width: 40%;" />
+
+
 ## 機能
 
 - **見開き表示**: 2ページを並べて表示
