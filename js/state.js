@@ -13,6 +13,7 @@ const state = {
 // DOM要素（imageViewer.js、app.jsから参照）
 const elements = {
   dropZone: null,
+  loading: null,
   viewer: null,
   pageRight: null,
   pageLeft: null,
@@ -36,6 +37,7 @@ let seekbarHideTimer = null;
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function initElements() {
   elements.dropZone = document.getElementById("drop-zone");
+  elements.loading = document.getElementById("loading");
   elements.viewer = document.getElementById("viewer");
   elements.pageRight = document.getElementById("page-right");
   elements.pageLeft = document.getElementById("page-left");
@@ -48,4 +50,15 @@ function initElements() {
   elements.seekbar = document.getElementById("seekbar");
   elements.seekbarCurrent = document.getElementById("seekbar-current");
   elements.seekbarTotal = document.getElementById("seekbar-total");
+}
+
+// ローディング表示/非表示（imageViewer.js、pdfViewer.jsから呼び出し）
+// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
+function showLoading() {
+  elements.loading.classList.remove("hidden");
+}
+
+// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
+function hideLoading() {
+  elements.loading.classList.add("hidden");
 }

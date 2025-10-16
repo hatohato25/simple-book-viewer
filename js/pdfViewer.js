@@ -96,6 +96,9 @@ function removePdfViewerEvents() {
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 async function loadPdf(file) {
   try {
+    // ローディング表示
+    showLoading();
+
     // PDF.jsを使用してPDFを読み込む
     const arrayBuffer = await file.arrayBuffer();
     const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
@@ -159,8 +162,13 @@ async function loadPdf(file) {
     elements.viewer.classList.remove("hidden");
 
     updatePdfPageDisplay();
+
+    // ローディング非表示
+    hideLoading();
   } catch (error) {
     console.error("[PDF] PDF読み込みエラー:", error);
+    // ローディング非表示
+    hideLoading();
     alert("PDFの読み込みに失敗しました。");
   }
 }

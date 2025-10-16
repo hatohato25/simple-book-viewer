@@ -93,6 +93,9 @@ function removeImageViewerEvents() {
 // 画像を読み込む（app.jsから呼び出し）
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 async function loadImages(files) {
+  // ローディング表示
+  showLoading();
+
   // 既存の画像URLを解放
   state.images.forEach((url) => {
     if (url) {
@@ -131,6 +134,9 @@ async function loadImages(files) {
   elements.viewer.classList.remove("hidden");
 
   updatePageDisplay();
+
+  // ローディング非表示
+  hideLoading();
 }
 
 // 見開き調整を切り替える
