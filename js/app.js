@@ -57,9 +57,12 @@ async function handleDrop(e) {
     case "pdf":
       await handlePdfFile(files[0]);
       break;
+    case "zip":
+      await handleZipFile(files[0]);
+      break;
     default:
       alert(
-        "対応していないファイル形式です。\n\n対応形式: 画像ファイル (JPG, PNG, GIF, WebP, AVIF), PDFファイル",
+        "対応していないファイル形式です。\n\n対応形式: 画像ファイル (JPG, PNG, GIF, WebP, AVIF), PDFファイル, ZIPファイル",
       );
       break;
   }
@@ -100,4 +103,25 @@ async function handlePdfFile(file) {
 
   // PDFビューアーのイベントリスナーを登録
   setupPdfViewerEvents();
+}
+
+// ZIPファイルの処理
+async function handleZipFile(file) {
+  try {
+    // ZIPファイルから画像を展開
+    const imageFiles = await extractImagesFromZip(file);
+
+    if (imageFiles.length === 0) {
+      alert(
+        "ZIPファイル内に画像ファイルが見つかりませんでした。\n\n対応形式: JPG, PNG, GIF, WebP, AVIF",
+      );
+      return;
+    }
+
+    // 展開した画像を画像ビューアーで表示
+    await handleImageFiles(imageFiles);
+  } catch (error) {
+    console.error("[ZIP] ZIP処理エラー:", error);
+    alert("ZIPファイルの処理に失敗しました。");
+  }
 }

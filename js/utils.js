@@ -14,6 +14,46 @@ function isPdfFile(file) {
   return fileName.endsWith(".pdf");
 }
 
+// ZIPファイルかどうかチェック（app.jsから呼び出し）
+function isZipFile(file) {
+  const fileName = file.name.toLowerCase();
+  return fileName.endsWith(".zip");
+}
+
+// ZIPファイルから画像ファイルを展開（app.jsから呼び出し）
+// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
+async function extractImagesFromZip(zipFile) {
+  try {
+    const zip = await JSZip.loadAsync(zipFile);
+    const imageFiles = [];
+
+    // ZIPファイル内のすべてのファイルを走査
+    for (const [filename, file] of Object.entries(zip.files)) {
+      // ディレクトリはスキップ
+      if (file.dir) continue;
+
+      // 画像ファイルかチェック
+      const lowerFilename = filename.toLowerCase();
+      const isImage = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"].some(
+        (ext) => lowerFilename.endsWith(ext),
+      );
+
+      if (isImage) {
+        // Blobとして取得してFileオブジェクトに変換
+        const blob = await file.async("blob");
+        const imageFile = new File([blob], filename, { type: blob.type });
+        imageFiles.push(imageFile);
+      }
+    }
+
+    console.log(`[ZIP] ${imageFiles.length}個の画像ファイルを展開しました`);
+    return imageFiles;
+  } catch (error) {
+    console.error("[ZIP] ZIP展開エラー:", error);
+    throw error;
+  }
+}
+
 // ファイル名の自然順ソート（app.jsから呼び出し）
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function sortFilesNaturally(files) {
@@ -159,6 +199,12 @@ async function collectDroppedFiles(dataTransferItems) {
 function detectFileType(files) {
   if (files.length === 0) {
     return "unknown";
+  }
+
+  // ZIPファイルかチェック（単一ファイル）
+  const zipFiles = files.filter(isZipFile);
+  if (zipFiles.length === 1 && files.length === 1) {
+    return "zip";
   }
 
   // PDFファイルかチェック（単一ファイル）

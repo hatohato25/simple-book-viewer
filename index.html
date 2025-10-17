@@ -11,9 +11,9 @@
         <!-- ドロップゾーン -->
         <div id="drop-zone" class="drop-zone">
             <div class="drop-zone-content">
-                <p>画像フォルダまたはPDFファイルをここにドロップ</p>
+                <p>画像フォルダ、PDF、またはZIPファイルをここにドロップ</p>
                 <p class="hint">フォルダをそのままドロップできます</p>
-                <p class="hint">対応形式: JPG, PNG, GIF, WebP, AVIF, PDF</p>
+                <p class="hint">対応形式: JPG, PNG, GIF, WebP, AVIF, PDF, ZIP</p>
             </div>
         </div>
 
@@ -32,8 +32,8 @@
                 </div>
 
                 <!-- クリック領域 -->
-                <div id="click-area-prev" class="click-area click-area-prev" title="前のページ (→キー)"></div>
-                <div id="click-area-next" class="click-area click-area-next" title="次のページ (←キー)"></div>
+                <div id="click-area-prev" class="click-area click-area-prev"></div>
+                <div id="click-area-next" class="click-area click-area-next"></div>
 
                 <!-- リセットボタン（中央上部） -->
                 <button id="btn-reset" class="btn-reset hidden" title="別のフォルダを読み込む">
@@ -74,6 +74,9 @@
         // PDF.js workerの設定
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
+
+    <!-- JSZip ライブラリ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script src="js/state.js"></script>
     <script src="js/utils.js"></script>
