@@ -18,6 +18,24 @@ function handlePdfClickNext() {
   showControls();
 }
 
+// マウスホイールのハンドラー（PDF用：左→右読み）
+function handlePdfWheel(e) {
+  // ビューアが非表示の場合は何もしない
+  if (elements.viewer.classList.contains("hidden")) return;
+
+  e.preventDefault();
+
+  // deltaY > 0: ホイール下 → 次のページ（右へ進む）
+  // deltaY < 0: ホイール上 → 前のページ（左へ戻る）
+  if (e.deltaY > 0) {
+    navigatePdfPage(2); // 次のページ
+  } else if (e.deltaY < 0) {
+    navigatePdfPage(-2); // 前のページ
+  }
+
+  showControls();
+}
+
 // イベントリスナーの初期化
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function setupPdfViewerEvents() {
@@ -35,6 +53,9 @@ function setupPdfViewerEvents() {
 
   // キーボード操作
   document.addEventListener("keydown", handlePdfKeydown);
+
+  // マウスホイール操作
+  document.addEventListener("wheel", handlePdfWheel, { passive: false });
 
   // ページコンテナクリックで表示
   const pageContainer = document.querySelector(".page-container");
@@ -68,6 +89,9 @@ function removePdfViewerEvents() {
 
   // キーボード操作
   document.removeEventListener("keydown", handlePdfKeydown);
+
+  // マウスホイール操作
+  document.removeEventListener("wheel", handlePdfWheel);
 
   // ページコンテナ
   const pageContainer = document.querySelector(".page-container");

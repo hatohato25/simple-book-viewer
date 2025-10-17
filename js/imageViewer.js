@@ -18,6 +18,24 @@ function handleImageClickNext() {
   showControls();
 }
 
+// マウスホイールのハンドラー（画像用：右→左読み）
+function handleImageWheel(e) {
+  // ビューアが非表示の場合は何もしない
+  if (elements.viewer.classList.contains("hidden")) return;
+
+  e.preventDefault();
+
+  // deltaY > 0: ホイール下 → 次のページ（左へ進む）
+  // deltaY < 0: ホイール上 → 前のページ（右へ戻る）
+  if (e.deltaY > 0) {
+    navigatePage(2); // 次のページ
+  } else if (e.deltaY < 0) {
+    navigatePage(-2); // 前のページ
+  }
+
+  showControls();
+}
+
 // イベントリスナーの初期化
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function setupImageViewerEvents() {
@@ -33,6 +51,9 @@ function setupImageViewerEvents() {
 
   // キーボード操作
   document.addEventListener("keydown", handleKeydown);
+
+  // マウスホイール操作
+  document.addEventListener("wheel", handleImageWheel, { passive: false });
 
   // ページコンテナクリックで表示
   const pageContainer = document.querySelector(".page-container");
@@ -66,6 +87,9 @@ function removeImageViewerEvents() {
 
   // キーボード操作
   document.removeEventListener("keydown", handleKeydown);
+
+  // マウスホイール操作
+  document.removeEventListener("wheel", handleImageWheel);
 
   // ページコンテナ
   const pageContainer = document.querySelector(".page-container");
