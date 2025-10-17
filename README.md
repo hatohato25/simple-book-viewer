@@ -92,10 +92,6 @@ book-viewer/
 │   └── app.js         # メインコントローラー
 ├── tests/             # ユニットテスト
 │   └── app.test.js
-├── .claude/           # プロジェクト管理ファイル
-│   ├── requirements.md
-│   ├── design.md
-│   └── tasks.md
 ├── package.json
 └── README.md
 ```
