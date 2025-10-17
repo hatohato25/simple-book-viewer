@@ -87,6 +87,39 @@ describe("画像ファイルフィルタリング", () => {
     const file = { name: "document.pdf" };
     expect(isImageFile(file)).toBe(false);
   });
+
+  it("ZIPファイルを画像として認識しない", () => {
+    const file = { name: "archive.zip" };
+    expect(isImageFile(file)).toBe(false);
+  });
+});
+
+describe("ZIPファイル判定", () => {
+  // ZIPファイル判定のためのisZipFile関数を定義
+  function isZipFile(file) {
+    const fileName = file.name.toLowerCase();
+    return fileName.endsWith(".zip");
+  }
+
+  it("ZIPファイルを正しく認識する", () => {
+    const file = { name: "archive.zip" };
+    expect(isZipFile(file)).toBe(true);
+  });
+
+  it("大文字拡張子のZIPファイルも認識する", () => {
+    const file = { name: "ARCHIVE.ZIP" };
+    expect(isZipFile(file)).toBe(true);
+  });
+
+  it("画像ファイルをZIPとして認識しない", () => {
+    const file = { name: "image.jpg" };
+    expect(isZipFile(file)).toBe(false);
+  });
+
+  it("PDFファイルをZIPとして認識しない", () => {
+    const file = { name: "document.pdf" };
+    expect(isZipFile(file)).toBe(false);
+  });
 });
 
 describe("ファイル名の自然順ソート", () => {
