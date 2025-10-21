@@ -239,6 +239,7 @@ describe("DOM操作のテスト", () => {
             </div>
           </div>
           <button id="btn-fullscreen" class="btn-fullscreen hidden"></button>
+          <button id="btn-bookmark" class="btn-bookmark hidden"></button>
         </div>
       </div>
     `;

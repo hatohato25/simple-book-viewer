@@ -69,6 +69,63 @@ function handleFullscreenChange() {
   }
 }
 
+// ブックマークハンドラー
+function handleBookmarkClick() {
+  if (!state.currentFileId) {
+    console.warn("[Bookmark] ファイルIDが設定されていません");
+    return;
+  }
+
+  // 既存のブックマークをチェック
+  const bookmark = loadBookmark(state.currentFileId);
+
+  if (bookmark && bookmark.currentPage === state.currentPage) {
+    // 現在のページが保存されたページと一致する場合のみ削除
+    if (deleteBookmark(state.currentFileId)) {
+      updateBookmarkButton();
+    }
+  } else {
+    // それ以外の場合は現在のページで上書き保存
+    if (
+      saveBookmark(
+        state.currentFileId,
+        state.currentFileName,
+        state.currentPage,
+        state.totalPages,
+        state.currentFileType,
+      )
+    ) {
+      updateBookmarkButton();
+    }
+  }
+}
+
+// ブックマークボタンの表示を更新
+function updateBookmarkButton() {
+  if (!state.currentFileId) {
+    elements.btnBookmark.classList.remove("active");
+    elements.btnBookmark.title = "このページをブックマーク";
+    return;
+  }
+
+  // ブックマークが存在するかチェック
+  const bookmark = loadBookmark(state.currentFileId);
+
+  if (bookmark && bookmark.currentPage === state.currentPage) {
+    // 保存されたページと現在のページが一致する場合のみアクティブ表示（塗りつぶし）
+    elements.btnBookmark.classList.add("active");
+    elements.btnBookmark.title = "ブックマークを削除";
+  } else {
+    // 一致しない場合は非アクティブ表示（枠線のみ）
+    elements.btnBookmark.classList.remove("active");
+    if (bookmark) {
+      elements.btnBookmark.title = `このページをブックマーク（現在: ${Math.floor(bookmark.currentPage / 2) + 1}ページ目に保存済み）`;
+    } else {
+      elements.btnBookmark.title = "このページをブックマーク";
+    }
+  }
+}
+
 // イベントリスナーの初期化
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function setupImageViewerEvents() {
@@ -84,6 +141,9 @@ function setupImageViewerEvents() {
 
   // 最大化ボタン
   elements.btnFullscreen.addEventListener("click", handleFullscreenClick);
+
+  // ブックマークボタン
+  elements.btnBookmark.addEventListener("click", handleBookmarkClick);
 
   // フルスクリーン状態の変化を監視
   document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -127,6 +187,9 @@ function removeImageViewerEvents() {
   // 最大化ボタン
   elements.btnFullscreen.removeEventListener("click", handleFullscreenClick);
 
+  // ブックマークボタン
+  elements.btnBookmark.removeEventListener("click", handleBookmarkClick);
+
   // フルスクリーン状態の変化を監視
   document.removeEventListener("fullscreenchange", handleFullscreenChange);
 
@@ -161,7 +224,12 @@ function removeImageViewerEvents() {
 
 // 画像を読み込む（app.jsから呼び出し）
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
-async function loadImages(files) {
+async function loadImages(
+  files,
+  fileName = null,
+  fileSize = null,
+  lastModified = null,
+) {
   // ローディング表示
   showLoading();
 
@@ -183,6 +251,22 @@ async function loadImages(files) {
   state.offsetEnabled = false; // 見開き調整をリセット
   state.totalPages = Math.ceil(state.images.length / 2);
 
+  // ファイル情報を保存（ブックマーク用）
+  if (fileName && fileSize && lastModified) {
+    state.currentFileId = generateFileId(fileName, fileSize, lastModified);
+    state.currentFileName = fileName;
+    state.currentFileType = "image";
+
+    // ブックマークが存在する場合は復元
+    const bookmark = loadBookmark(state.currentFileId);
+    if (bookmark) {
+      state.currentPage = bookmark.currentPage;
+      console.log(
+        `[Bookmark] 前回の位置から再開: ページ ${bookmark.currentPage}/${bookmark.totalPages}`,
+      );
+    }
+  }
+
   // シークバーを初期化
   elements.seekbar.max = state.totalPages;
   elements.seekbar.value = 1;
@@ -203,6 +287,9 @@ async function loadImages(files) {
   elements.viewer.classList.remove("hidden");
 
   updatePageDisplay();
+
+  // ブックマークボタンの状態を更新
+  updateBookmarkButton();
 
   // ローディング非表示
   hideLoading();
@@ -333,6 +420,9 @@ async function updatePageDisplay() {
   elements.seekbar.value = currentPageNumber;
   elements.seekbarCurrent.textContent = currentPageNumber;
 
+  // ブックマークボタンの状態を更新（ページ遷移時）
+  updateBookmarkButton();
+
   // クリック領域の表示/非表示を更新
   // 最初のページ：前のページ領域を非表示
   if (state.currentPage <= 0) {
@@ -421,6 +511,7 @@ function showControls() {
   elements.seekbarContainer.classList.remove("hidden");
   elements.btnOffset.classList.remove("hidden");
   elements.btnFullscreen.classList.remove("hidden");
+  elements.btnBookmark.classList.remove("hidden");
   elements.btnReset.classList.remove("hidden");
 
   // 3秒後に自動非表示
@@ -449,6 +540,7 @@ function hideControls() {
   elements.seekbarContainer.classList.add("hidden");
   elements.btnOffset.classList.add("hidden");
   elements.btnFullscreen.classList.add("hidden");
+  elements.btnBookmark.classList.add("hidden");
   elements.btnReset.classList.add("hidden");
 }
 

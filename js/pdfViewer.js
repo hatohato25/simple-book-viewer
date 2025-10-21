@@ -69,6 +69,37 @@ function handlePdfFullscreenChange() {
   }
 }
 
+// ブックマークハンドラー（PDF用）
+function handlePdfBookmarkClick() {
+  if (!state.currentFileId) {
+    console.warn("[Bookmark] ファイルIDが設定されていません");
+    return;
+  }
+
+  // 既存のブックマークをチェック
+  const bookmark = loadBookmark(state.currentFileId);
+
+  if (bookmark && bookmark.currentPage === state.currentPage) {
+    // 現在のページが保存されたページと一致する場合のみ削除
+    if (deleteBookmark(state.currentFileId)) {
+      updateBookmarkButton();
+    }
+  } else {
+    // それ以外の場合は現在のページで上書き保存
+    if (
+      saveBookmark(
+        state.currentFileId,
+        state.currentFileName,
+        state.currentPage,
+        state.totalPages,
+        state.currentFileType,
+      )
+    ) {
+      updateBookmarkButton();
+    }
+  }
+}
+
 // イベントリスナーの初期化
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function setupPdfViewerEvents() {
@@ -86,6 +117,9 @@ function setupPdfViewerEvents() {
 
   // 最大化ボタン
   elements.btnFullscreen.addEventListener("click", handlePdfFullscreenClick);
+
+  // ブックマークボタン
+  elements.btnBookmark.addEventListener("click", handlePdfBookmarkClick);
 
   // フルスクリーン状態の変化を監視
   document.addEventListener("fullscreenchange", handlePdfFullscreenChange);
@@ -128,6 +162,9 @@ function removePdfViewerEvents() {
 
   // 最大化ボタン
   elements.btnFullscreen.removeEventListener("click", handlePdfFullscreenClick);
+
+  // ブックマークボタン
+  elements.btnBookmark.removeEventListener("click", handlePdfBookmarkClick);
 
   // フルスクリーン状態の変化を監視
   document.removeEventListener("fullscreenchange", handlePdfFullscreenChange);
@@ -211,6 +248,24 @@ async function loadPdf(file) {
     state.offsetEnabled = false;
     state.totalPages = Math.ceil(state.images.length / 2);
 
+    // ファイル情報を保存（ブックマーク用）
+    state.currentFileId = generateFileId(
+      file.name,
+      file.size,
+      file.lastModified,
+    );
+    state.currentFileName = file.name;
+    state.currentFileType = "pdf";
+
+    // ブックマークが存在する場合は復元
+    const bookmark = loadBookmark(state.currentFileId);
+    if (bookmark) {
+      state.currentPage = bookmark.currentPage;
+      console.log(
+        `[Bookmark] 前回の位置から再開: ページ ${bookmark.currentPage}/${bookmark.totalPages}`,
+      );
+    }
+
     // シークバーを初期化
     elements.seekbar.max = state.totalPages;
     elements.seekbar.value = 1;
@@ -231,6 +286,9 @@ async function loadPdf(file) {
     elements.viewer.classList.remove("hidden");
 
     updatePdfPageDisplay();
+
+    // ブックマークボタンの状態を更新
+    updateBookmarkButton();
 
     // ローディング非表示
     hideLoading();
@@ -386,6 +444,9 @@ async function updatePdfPageDisplay() {
   } else {
     elements.clickAreaPrev.classList.remove("hidden");
   }
+
+  // ブックマークボタンの状態を更新（ページ遷移時）
+  updateBookmarkButton();
 }
 
 // ページ遷移

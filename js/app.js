@@ -72,7 +72,7 @@ async function handleDrop(e) {
 }
 
 // 画像ファイルの処理
-async function handleImageFiles(files) {
+async function handleImageFiles(files, originalFile = null) {
   // 画像ファイルのみフィルタリング
   const imageFiles = files.filter(isImageFile);
 
@@ -90,7 +90,25 @@ async function handleImageFiles(files) {
   removePdfViewerEvents();
 
   // 画像ビューアーで読み込んで表示
-  await loadImages(imageFiles);
+  // ファイル情報を渡す（ブックマーク用）
+  if (originalFile) {
+    await loadImages(
+      imageFiles,
+      originalFile.name,
+      originalFile.size,
+      originalFile.lastModified,
+    );
+  } else if (imageFiles.length > 0) {
+    // 元ファイルがない場合は最初の画像ファイルの情報を使用
+    await loadImages(
+      imageFiles,
+      imageFiles[0].name,
+      imageFiles[0].size,
+      imageFiles[0].lastModified,
+    );
+  } else {
+    await loadImages(imageFiles);
+  }
 
   // 画像ビューアーのイベントリスナーを登録
   setupImageViewerEvents();
@@ -121,8 +139,8 @@ async function handleEpubFile(file) {
       return;
     }
 
-    // 展開した画像を画像ビューアーで表示
-    await handleImageFiles(imageFiles);
+    // 展開した画像を画像ビューアーで表示（元のEPUBファイル情報を渡す）
+    await handleImageFiles(imageFiles, file);
   } catch (error) {
     console.error("[EPUB] EPUB処理エラー:", error);
     alert("EPUBファイルの処理に失敗しました。");
@@ -142,8 +160,8 @@ async function handleZipFile(file) {
       return;
     }
 
-    // 展開した画像を画像ビューアーで表示
-    await handleImageFiles(imageFiles);
+    // 展開した画像を画像ビューアーで表示（元のZIPファイル情報を渡す）
+    await handleImageFiles(imageFiles, file);
   } catch (error) {
     console.error("[ZIP] ZIP処理エラー:", error);
     alert("ZIPファイルの処理に失敗しました。");

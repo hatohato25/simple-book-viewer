@@ -335,6 +335,64 @@ body {
   display: none;
 }
 
+/* ブックマークボタン */
+.btn-bookmark {
+  padding: 0.5rem 1rem;
+  background-color: rgba(66, 66, 66, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+  white-space: nowrap;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-bookmark:hover {
+  background-color: rgba(88, 88, 88, 0.9);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-bookmark.active {
+  background-color: rgba(255, 193, 7, 0.9);
+  border-color: rgba(255, 193, 7, 0.5);
+}
+
+.btn-bookmark.active:hover {
+  background-color: rgba(255, 179, 0, 0.9);
+  border-color: rgba(255, 179, 0, 0.5);
+}
+
+.btn-bookmark.hidden {
+  display: none;
+}
+
+/* ブックマークアイコン（SVG） */
+.bookmark-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+/* 非アクティブ時：枠線のみ（白） */
+.btn-bookmark .bookmark-path {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 2;
+  transition: all 0.3s ease;
+}
+
+/* アクティブ時：塗りつぶし（黒） */
+.btn-bookmark.active .bookmark-path {
+  fill: #000000;
+  stroke: #000000;
+  stroke-width: 1;
+}
+
 /* フルスクリーン時のスタイル調整 */
 .viewer:fullscreen {
   background-color: #1a1a1a;
