@@ -21,6 +21,7 @@ const elements = {
   clickAreaNext: null,
   btnReset: null,
   btnOffset: null,
+  btnFullscreen: null,
   bottomControls: null,
   seekbarContainer: null,
   seekbar: null,
@@ -45,6 +46,7 @@ function initElements() {
   elements.clickAreaNext = document.getElementById("click-area-next");
   elements.btnReset = document.getElementById("btn-reset");
   elements.btnOffset = document.getElementById("btn-offset");
+  elements.btnFullscreen = document.getElementById("btn-fullscreen");
   elements.bottomControls = document.getElementById("bottom-controls");
   elements.seekbarContainer = document.getElementById("seekbar-container");
   elements.seekbar = document.getElementById("seekbar");

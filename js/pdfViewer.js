@@ -36,6 +36,39 @@ function handlePdfWheel(e) {
   showControls();
 }
 
+// フルスクリーンハンドラー（PDF用）
+function handlePdfFullscreenClick() {
+  togglePdfFullscreen();
+}
+
+function togglePdfFullscreen() {
+  if (!document.fullscreenElement) {
+    // フルスクリーンに入る
+    elements.viewer
+      .requestFullscreen()
+      .then(() => {
+        // 成功時の処理はfullscreenchangeイベントで行う
+      })
+      .catch((err) => {
+        console.error("フルスクリーンの開始に失敗しました:", err);
+      });
+  } else {
+    // フルスクリーンを終了
+    document.exitFullscreen();
+  }
+}
+
+function handlePdfFullscreenChange() {
+  // フルスクリーン状態に応じてボタンのテキストとタイトルを変更
+  if (document.fullscreenElement) {
+    elements.btnFullscreen.textContent = "⛶";
+    elements.btnFullscreen.title = "最大化表示を終了";
+  } else {
+    elements.btnFullscreen.textContent = "⛶";
+    elements.btnFullscreen.title = "最大化表示";
+  }
+}
+
 // イベントリスナーの初期化
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function setupPdfViewerEvents() {
@@ -50,6 +83,12 @@ function setupPdfViewerEvents() {
 
   // 見開き調整ボタン
   elements.btnOffset.addEventListener("click", togglePdfOffset);
+
+  // 最大化ボタン
+  elements.btnFullscreen.addEventListener("click", handlePdfFullscreenClick);
+
+  // フルスクリーン状態の変化を監視
+  document.addEventListener("fullscreenchange", handlePdfFullscreenChange);
 
   // キーボード操作
   document.addEventListener("keydown", handlePdfKeydown);
@@ -86,6 +125,12 @@ function removePdfViewerEvents() {
 
   // 見開き調整ボタン
   elements.btnOffset.removeEventListener("click", togglePdfOffset);
+
+  // 最大化ボタン
+  elements.btnFullscreen.removeEventListener("click", handlePdfFullscreenClick);
+
+  // フルスクリーン状態の変化を監視
+  document.removeEventListener("fullscreenchange", handlePdfFullscreenChange);
 
   // キーボード操作
   document.removeEventListener("keydown", handlePdfKeydown);

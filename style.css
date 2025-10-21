@@ -307,6 +307,50 @@ body {
   text-align: center;
 }
 
+/* 最大化ボタン */
+.btn-fullscreen {
+  padding: 0.5rem 1rem;
+  font-size: 1.5rem;
+  background-color: rgba(66, 66, 66, 0.9);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+  white-space: nowrap;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-fullscreen:hover {
+  background-color: rgba(88, 88, 88, 0.9);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-fullscreen.hidden {
+  display: none;
+}
+
+/* フルスクリーン時のスタイル調整 */
+.viewer:fullscreen {
+  background-color: #1a1a1a;
+}
+
+.viewer:fullscreen .viewer-container {
+  height: 100vh;
+}
+
+.viewer:fullscreen .bottom-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 /* リセットボタン */
 .btn-reset {
   position: absolute;

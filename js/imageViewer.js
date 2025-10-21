@@ -36,6 +36,39 @@ function handleImageWheel(e) {
   showControls();
 }
 
+// フルスクリーンハンドラー
+function handleFullscreenClick() {
+  toggleFullscreen();
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    // フルスクリーンに入る
+    elements.viewer
+      .requestFullscreen()
+      .then(() => {
+        // 成功時の処理はfullscreenchangeイベントで行う
+      })
+      .catch((err) => {
+        console.error("フルスクリーンの開始に失敗しました:", err);
+      });
+  } else {
+    // フルスクリーンを終了
+    document.exitFullscreen();
+  }
+}
+
+function handleFullscreenChange() {
+  // フルスクリーン状態に応じてボタンのテキストとタイトルを変更
+  if (document.fullscreenElement) {
+    elements.btnFullscreen.textContent = "⛶";
+    elements.btnFullscreen.title = "最大化表示を終了";
+  } else {
+    elements.btnFullscreen.textContent = "⛶";
+    elements.btnFullscreen.title = "最大化表示";
+  }
+}
+
 // イベントリスナーの初期化
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function setupImageViewerEvents() {
@@ -48,6 +81,12 @@ function setupImageViewerEvents() {
 
   // 見開き調整ボタン
   elements.btnOffset.addEventListener("click", toggleOffset);
+
+  // 最大化ボタン
+  elements.btnFullscreen.addEventListener("click", handleFullscreenClick);
+
+  // フルスクリーン状態の変化を監視
+  document.addEventListener("fullscreenchange", handleFullscreenChange);
 
   // キーボード操作
   document.addEventListener("keydown", handleKeydown);
@@ -84,6 +123,12 @@ function removeImageViewerEvents() {
 
   // 見開き調整ボタン
   elements.btnOffset.removeEventListener("click", toggleOffset);
+
+  // 最大化ボタン
+  elements.btnFullscreen.removeEventListener("click", handleFullscreenClick);
+
+  // フルスクリーン状態の変化を監視
+  document.removeEventListener("fullscreenchange", handleFullscreenChange);
 
   // キーボード操作
   document.removeEventListener("keydown", handleKeydown);
@@ -375,6 +420,7 @@ function showControls() {
   elements.bottomControls.classList.add("visible");
   elements.seekbarContainer.classList.remove("hidden");
   elements.btnOffset.classList.remove("hidden");
+  elements.btnFullscreen.classList.remove("hidden");
   elements.btnReset.classList.remove("hidden");
 
   // 3秒後に自動非表示
@@ -402,6 +448,7 @@ function hideControls() {
   elements.bottomControls.classList.remove("visible");
   elements.seekbarContainer.classList.add("hidden");
   elements.btnOffset.classList.add("hidden");
+  elements.btnFullscreen.classList.add("hidden");
   elements.btnReset.classList.add("hidden");
 }
 

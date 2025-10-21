@@ -11,9 +11,9 @@
         <!-- ドロップゾーン -->
         <div id="drop-zone" class="drop-zone">
             <div class="drop-zone-content">
-                <p>画像フォルダ、PDF、またはZIPファイルをここにドロップ</p>
+                <p>画像フォルダ、PDF、EPUB、またはZIPファイルをここにドロップ</p>
                 <p class="hint">フォルダをそのままドロップできます</p>
-                <p class="hint">対応形式: JPG, PNG, GIF, WebP, AVIF, PDF, ZIP</p>
+                <p class="hint">対応形式: JPG, PNG, GIF, WebP, AVIF, PDF, EPUB, ZIP</p>
             </div>
         </div>
 
@@ -63,6 +63,11 @@
                         <span id="seekbar-current">1</span> / <span id="seekbar-total">1</span>
                     </div>
                 </div>
+
+                <!-- 最大化ボタン -->
+                <button id="btn-fullscreen" class="btn-fullscreen hidden" title="最大化表示">
+                    ⛶
+                </button>
             </div>
         </div>
     </div>

@@ -20,6 +20,46 @@ function isZipFile(file) {
   return fileName.endsWith(".zip");
 }
 
+// EPUBファイルかどうかチェック（app.jsから呼び出し）
+function isEpubFile(file) {
+  const fileName = file.name.toLowerCase();
+  return fileName.endsWith(".epub");
+}
+
+// EPUBファイルから画像ファイルを展開（app.jsから呼び出し）
+// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
+async function extractImagesFromEpub(epubFile) {
+  try {
+    const zip = await JSZip.loadAsync(epubFile);
+    const imageFiles = [];
+
+    // EPUBファイル内のすべてのファイルを走査
+    for (const [filename, file] of Object.entries(zip.files)) {
+      // ディレクトリはスキップ
+      if (file.dir) continue;
+
+      // 画像ファイルかチェック
+      const lowerFilename = filename.toLowerCase();
+      const isImage = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"].some(
+        (ext) => lowerFilename.endsWith(ext),
+      );
+
+      if (isImage) {
+        // Blobとして取得してFileオブジェクトに変換
+        const blob = await file.async("blob");
+        const imageFile = new File([blob], filename, { type: blob.type });
+        imageFiles.push(imageFile);
+      }
+    }
+
+    console.log(`[EPUB] ${imageFiles.length}個の画像ファイルを展開しました`);
+    return imageFiles;
+  } catch (error) {
+    console.error("[EPUB] EPUB展開エラー:", error);
+    throw error;
+  }
+}
+
 // ZIPファイルから画像ファイルを展開（app.jsから呼び出し）
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 async function extractImagesFromZip(zipFile) {
@@ -199,6 +239,12 @@ async function collectDroppedFiles(dataTransferItems) {
 function detectFileType(files) {
   if (files.length === 0) {
     return "unknown";
+  }
+
+  // EPUBファイルかチェック（単一ファイル）
+  const epubFiles = files.filter(isEpubFile);
+  if (epubFiles.length === 1 && files.length === 1) {
+    return "epub";
   }
 
   // ZIPファイルかチェック（単一ファイル）

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 // テスト用のユーティリティ関数
 function isImageFile(file) {
@@ -238,6 +238,7 @@ describe("DOM操作のテスト", () => {
               <span id="seekbar-current">1</span> / <span id="seekbar-total">1</span>
             </div>
           </div>
+          <button id="btn-fullscreen" class="btn-fullscreen hidden"></button>
         </div>
       </div>
     `;
