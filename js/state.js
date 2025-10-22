@@ -26,6 +26,10 @@ const elements = {
   btnOffset: null,
   btnFullscreen: null,
   btnBookmark: null,
+  btnThumbnail: null,
+  thumbnailOverlay: null,
+  thumbnailGrid: null,
+  thumbnailCloseBtn: null,
   bottomControls: null,
   seekbarContainer: null,
   seekbar: null,
@@ -52,6 +56,10 @@ function initElements() {
   elements.btnOffset = document.getElementById("btn-offset");
   elements.btnFullscreen = document.getElementById("btn-fullscreen");
   elements.btnBookmark = document.getElementById("btn-bookmark");
+  elements.btnThumbnail = document.getElementById("btn-thumbnail");
+  elements.thumbnailOverlay = document.getElementById("thumbnail-overlay");
+  elements.thumbnailGrid = document.getElementById("thumbnail-grid");
+  elements.thumbnailCloseBtn = document.getElementById("thumbnail-close-btn");
   elements.bottomControls = document.getElementById("bottom-controls");
   elements.seekbarContainer = document.getElementById("seekbar-container");
   elements.seekbar = document.getElementById("seekbar");

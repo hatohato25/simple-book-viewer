@@ -145,11 +145,26 @@ function setupImageViewerEvents() {
   // ブックマークボタン
   elements.btnBookmark.addEventListener("click", handleBookmarkClick);
 
+  // サムネイルボタン
+  elements.btnThumbnail.addEventListener("click", toggleThumbnailOverlay);
+
+  // サムネイルオーバーレイの閉じるボタン
+  elements.thumbnailCloseBtn.addEventListener("click", closeThumbnailOverlay);
+
+  // サムネイルオーバーレイ背景クリック
+  elements.thumbnailOverlay.addEventListener(
+    "click",
+    handleThumbnailOverlayClick,
+  );
+
   // フルスクリーン状態の変化を監視
   document.addEventListener("fullscreenchange", handleFullscreenChange);
 
   // キーボード操作
   document.addEventListener("keydown", handleKeydown);
+
+  // ESCキーでサムネイルを閉じる
+  document.addEventListener("keydown", handleThumbnailEscape);
 
   // マウスホイール操作
   document.addEventListener("wheel", handleImageWheel, { passive: false });
@@ -190,11 +205,29 @@ function removeImageViewerEvents() {
   // ブックマークボタン
   elements.btnBookmark.removeEventListener("click", handleBookmarkClick);
 
+  // サムネイルボタン
+  elements.btnThumbnail.removeEventListener("click", toggleThumbnailOverlay);
+
+  // サムネイルオーバーレイの閉じるボタン
+  elements.thumbnailCloseBtn.removeEventListener(
+    "click",
+    closeThumbnailOverlay,
+  );
+
+  // サムネイルオーバーレイ背景クリック
+  elements.thumbnailOverlay.removeEventListener(
+    "click",
+    handleThumbnailOverlayClick,
+  );
+
   // フルスクリーン状態の変化を監視
   document.removeEventListener("fullscreenchange", handleFullscreenChange);
 
   // キーボード操作
   document.removeEventListener("keydown", handleKeydown);
+
+  // ESCキーでサムネイルを閉じる
+  document.removeEventListener("keydown", handleThumbnailEscape);
 
   // マウスホイール操作
   document.removeEventListener("wheel", handleImageWheel);
@@ -512,6 +545,7 @@ function showControls() {
   elements.btnOffset.classList.remove("hidden");
   elements.btnFullscreen.classList.remove("hidden");
   elements.btnBookmark.classList.remove("hidden");
+  elements.btnThumbnail.classList.remove("hidden");
   elements.btnReset.classList.remove("hidden");
 
   // 3秒後に自動非表示

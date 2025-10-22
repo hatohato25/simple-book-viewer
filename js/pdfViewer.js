@@ -121,11 +121,26 @@ function setupPdfViewerEvents() {
   // ブックマークボタン
   elements.btnBookmark.addEventListener("click", handlePdfBookmarkClick);
 
+  // サムネイルボタン
+  elements.btnThumbnail.addEventListener("click", toggleThumbnailOverlay);
+
+  // サムネイルオーバーレイの閉じるボタン
+  elements.thumbnailCloseBtn.addEventListener("click", closeThumbnailOverlay);
+
+  // サムネイルオーバーレイ背景クリック
+  elements.thumbnailOverlay.addEventListener(
+    "click",
+    handleThumbnailOverlayClick,
+  );
+
   // フルスクリーン状態の変化を監視
   document.addEventListener("fullscreenchange", handlePdfFullscreenChange);
 
   // キーボード操作
   document.addEventListener("keydown", handlePdfKeydown);
+
+  // ESCキーでサムネイルを閉じる
+  document.addEventListener("keydown", handleThumbnailEscape);
 
   // マウスホイール操作
   document.addEventListener("wheel", handlePdfWheel, { passive: false });
@@ -166,11 +181,29 @@ function removePdfViewerEvents() {
   // ブックマークボタン
   elements.btnBookmark.removeEventListener("click", handlePdfBookmarkClick);
 
+  // サムネイルボタン
+  elements.btnThumbnail.removeEventListener("click", toggleThumbnailOverlay);
+
+  // サムネイルオーバーレイの閉じるボタン
+  elements.thumbnailCloseBtn.removeEventListener(
+    "click",
+    closeThumbnailOverlay,
+  );
+
+  // サムネイルオーバーレイ背景クリック
+  elements.thumbnailOverlay.removeEventListener(
+    "click",
+    handleThumbnailOverlayClick,
+  );
+
   // フルスクリーン状態の変化を監視
   document.removeEventListener("fullscreenchange", handlePdfFullscreenChange);
 
   // キーボード操作
   document.removeEventListener("keydown", handlePdfKeydown);
+
+  // ESCキーでサムネイルを閉じる
+  document.removeEventListener("keydown", handleThumbnailEscape);
 
   // マウスホイール操作
   document.removeEventListener("wheel", handlePdfWheel);
@@ -284,6 +317,15 @@ async function loadPdf(file) {
     // UIを更新
     elements.dropZone.classList.add("hidden");
     elements.viewer.classList.remove("hidden");
+
+    // コントロールボタンを表示
+    elements.bottomControls.classList.add("visible");
+    elements.seekbarContainer.classList.remove("hidden");
+    elements.btnOffset.classList.remove("hidden");
+    elements.btnFullscreen.classList.remove("hidden");
+    elements.btnBookmark.classList.remove("hidden");
+    elements.btnThumbnail.classList.remove("hidden");
+    elements.btnReset.classList.remove("hidden");
 
     updatePdfPageDisplay();
 

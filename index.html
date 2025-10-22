@@ -75,6 +75,29 @@
                         <path class="bookmark-path" d="M5 2h14a1 1 0 0 1 1 1v18.5a.5.5 0 0 1-.777.416L12 17.5l-7.223 4.416A.5.5 0 0 1 4 21.5V3a1 1 0 0 1 1-1z"/>
                     </svg>
                 </button>
+
+                <!-- サムネイルボタン -->
+                <button id="btn-thumbnail" class="btn-thumbnail hidden" title="ページ一覧を表示">
+                    <svg class="thumbnail-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/>
+                        <rect x="13" y="3" width="7" height="7" rx="1"/>
+                        <rect x="3" y="13" width="7" height="7" rx="1"/>
+                        <rect x="13" y="13" width="7" height="7" rx="1"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- サムネイルオーバーレイ -->
+        <div id="thumbnail-overlay" class="thumbnail-overlay hidden">
+            <div class="thumbnail-container">
+                <div class="thumbnail-header">
+                    <h2>ページ一覧</h2>
+                    <button id="thumbnail-close-btn" class="thumbnail-close-btn">×</button>
+                </div>
+                <div id="thumbnail-grid" class="thumbnail-grid">
+                    <!-- 動的に生成されるサムネイル -->
+                </div>
             </div>
         </div>
     </div>
@@ -92,6 +115,7 @@
 
     <script src="js/state.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/thumbnail.js"></script>
     <script src="js/imageViewer.js"></script>
     <script src="js/pdfViewer.js"></script>
     <script src="js/app.js"></script>
