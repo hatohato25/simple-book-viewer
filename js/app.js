@@ -1,11 +1,13 @@
 // メインコントローラー
 
 // 初期化
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   initElements();
   initDropZone();
   initImageViewer();
   initPdfViewer();
+  setupRecentFilesEvents();
+  await renderRecentFiles();
 });
 
 // ドロップゾーンの初期化
@@ -72,7 +74,12 @@ async function handleDrop(e) {
 }
 
 // 画像ファイルの処理
-async function handleImageFiles(files, originalFile = null) {
+async function handleImageFiles(
+  files,
+  originalFile = null,
+  fileType = "image",
+  existingFileId = null,
+) {
   // 画像ファイルのみフィルタリング
   const imageFiles = files.filter(isImageFile);
 
@@ -97,14 +104,31 @@ async function handleImageFiles(files, originalFile = null) {
       originalFile.name,
       originalFile.size,
       originalFile.lastModified,
+      originalFile, // Blobとして保存
+      fileType, // ファイルタイプ（zip/epub/imageなど）
+      existingFileId, // 履歴から開いた場合のfileId
     );
   } else if (imageFiles.length > 0) {
-    // 元ファイルがない場合は最初の画像ファイルの情報を使用
+    // 元ファイルがない場合（ディレクトリドロップ）は全ファイルを保存
+    // ディレクトリ名として最初のファイルのパスから推測
+    const dirName = imageFiles[0].webkitRelativePath
+      ? imageFiles[0].webkitRelativePath.split("/")[0]
+      : "images";
+
+    // ディレクトリの一意性確保のため、専用のID生成関数を使用
+    // existingFileIdがあればそれを優先（履歴から開いた場合）
+    const directoryId =
+      existingFileId || generateDirectoryId(dirName, imageFiles);
+
+    // ダミーの値を渡す（loadImages内でdirectoryIdを直接使用）
     await loadImages(
       imageFiles,
-      imageFiles[0].name,
-      imageFiles[0].size,
-      imageFiles[0].lastModified,
+      dirName,
+      imageFiles.length, // サイズの代わりにファイル数を渡す
+      0, // lastModifiedは使用しない
+      imageFiles, // 全ファイルを配列として保存
+      "directory",
+      directoryId, // ディレクトリIDを渡す
     );
   } else {
     await loadImages(imageFiles);
@@ -115,19 +139,19 @@ async function handleImageFiles(files, originalFile = null) {
 }
 
 // PDFファイルの処理
-async function handlePdfFile(file) {
+async function handlePdfFile(file, existingFileId = null) {
   // 画像ビューアーのイベントリスナーを削除
   removeImageViewerEvents();
 
   // PDFビューアーで読み込んで表示
-  await loadPdf(file);
+  await loadPdf(file, existingFileId);
 
   // PDFビューアーのイベントリスナーを登録
   setupPdfViewerEvents();
 }
 
 // EPUBファイルの処理
-async function handleEpubFile(file) {
+async function handleEpubFile(file, existingFileId = null) {
   try {
     // EPUBファイルから画像を展開
     const imageFiles = await extractImagesFromEpub(file);
@@ -140,7 +164,7 @@ async function handleEpubFile(file) {
     }
 
     // 展開した画像を画像ビューアーで表示（元のEPUBファイル情報を渡す）
-    await handleImageFiles(imageFiles, file);
+    await handleImageFiles(imageFiles, file, "epub", existingFileId);
   } catch (error) {
     console.error("[EPUB] EPUB処理エラー:", error);
     alert("EPUBファイルの処理に失敗しました。");
@@ -148,7 +172,7 @@ async function handleEpubFile(file) {
 }
 
 // ZIPファイルの処理
-async function handleZipFile(file) {
+async function handleZipFile(file, existingFileId = null) {
   try {
     // ZIPファイルから画像を展開
     const imageFiles = await extractImagesFromZip(file);
@@ -161,7 +185,7 @@ async function handleZipFile(file) {
     }
 
     // 展開した画像を画像ビューアーで表示（元のZIPファイル情報を渡す）
-    await handleImageFiles(imageFiles, file);
+    await handleImageFiles(imageFiles, file, "zip", existingFileId);
   } catch (error) {
     console.error("[ZIP] ZIP処理エラー:", error);
     alert("ZIPファイルの処理に失敗しました。");

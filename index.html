@@ -10,6 +10,17 @@
     <div id="app">
         <!-- ドロップゾーン -->
         <div id="drop-zone" class="drop-zone">
+            <!-- 最近読んだファイル履歴 -->
+            <div id="recent-files-section" class="recent-files-section hidden">
+                <div class="recent-files-header">
+                    <h3>最近読んだファイル</h3>
+                    <button id="btn-clear-all-history" class="btn-clear-all" title="全履歴を削除">全クリア</button>
+                </div>
+                <div id="recent-files-list" class="recent-files-list">
+                    <!-- 動的に生成される履歴カード -->
+                </div>
+            </div>
+
             <div class="drop-zone-content">
                 <p>画像フォルダ、PDF、EPUB、またはZIPファイルをここにドロップ</p>
                 <p class="hint">フォルダをそのままドロップできます</p>
@@ -115,6 +126,8 @@
 
     <script src="js/state.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/fileHistory.js"></script>
+    <script src="js/recentFiles.js"></script>
     <script src="js/thumbnail.js"></script>
     <script src="js/imageViewer.js"></script>
     <script src="js/pdfViewer.js"></script>

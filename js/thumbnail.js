@@ -21,7 +21,6 @@ function toggleThumbnailOverlay() {
 }
 
 // サムネイルオーバーレイを閉じる
-// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function closeThumbnailOverlay() {
   elements.thumbnailOverlay.classList.add("hidden");
 
@@ -75,7 +74,6 @@ function generateThumbnails() {
 }
 
 // サムネイルクリックでページジャンプ
-// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function jumpToPageFromThumbnail(pageIndex) {
   // 見開き表示なので、偶数インデックスに調整
   const adjustedPage = Math.floor(pageIndex / 2) * 2;
@@ -96,7 +94,6 @@ function jumpToPageFromThumbnail(pageIndex) {
 }
 
 // 現在ページのサムネイルをハイライト
-// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function updateThumbnailHighlight() {
   // すべてのアイテムからactiveクラスを削除
   const allItems = elements.thumbnailGrid.querySelectorAll(".thumbnail-item");
@@ -146,7 +143,6 @@ function handleThumbnailOverlayClick(event) {
 
 // サムネイルオーバーレイ内でのホイールイベントを処理
 // ビューアのホイールイベントへの伝播を防ぐ
-// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function handleThumbnailWheel(event) {
   // オーバーレイが表示されている場合のみ処理
   if (!elements.thumbnailOverlay.classList.contains("hidden")) {

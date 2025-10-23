@@ -233,7 +233,7 @@ function removePdfViewerEvents() {
 
 // PDFを読み込む（app.jsから呼び出し）
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
-async function loadPdf(file) {
+async function loadPdf(file, existingFileId = null) {
   try {
     // ローディング表示
     showLoading();
@@ -282,11 +282,9 @@ async function loadPdf(file) {
     state.totalPages = Math.ceil(state.images.length / 2);
 
     // ファイル情報を保存（ブックマーク用）
-    state.currentFileId = generateFileId(
-      file.name,
-      file.size,
-      file.lastModified,
-    );
+    // 既存のfileIdがあればそれを使用（履歴から開いた場合）
+    state.currentFileId =
+      existingFileId || generateFileId(file.name, file.size, file.lastModified);
     state.currentFileName = file.name;
     state.currentFileType = "pdf";
 
@@ -334,6 +332,22 @@ async function loadPdf(file) {
 
     // ローディング非表示
     hideLoading();
+
+    // 履歴に保存
+    try {
+      const thumbnail = await generateThumbnail(state.images[0]);
+      await saveFileHistory({
+        fileId: existingFileId || state.currentFileId,
+        fileName: file.name,
+        fileType: "pdf",
+        fileBlob: file,
+        thumbnail: thumbnail,
+        totalPages: state.images.length,
+      });
+      await renderRecentFiles();
+    } catch (error) {
+      console.error("[History] 履歴の保存に失敗しました:", error);
+    }
   } catch (error) {
     console.error("[PDF] PDF読み込みエラー:", error);
     // ローディング非表示

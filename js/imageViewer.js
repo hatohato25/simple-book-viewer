@@ -262,6 +262,9 @@ async function loadImages(
   fileName = null,
   fileSize = null,
   lastModified = null,
+  originalFileBlob = null,
+  fileType = "image",
+  existingFileId = null,
 ) {
   // ローディング表示
   showLoading();
@@ -285,18 +288,27 @@ async function loadImages(
   state.totalPages = Math.ceil(state.images.length / 2);
 
   // ファイル情報を保存（ブックマーク用）
-  if (fileName && fileSize && lastModified) {
-    state.currentFileId = generateFileId(fileName, fileSize, lastModified);
+  if (fileName) {
+    // 既存のfileIdがあればそれを使用（履歴から開いた場合やディレクトリの場合）
+    if (existingFileId) {
+      state.currentFileId = existingFileId;
+    } else if (fileSize && lastModified) {
+      // 通常のファイルの場合
+      state.currentFileId = generateFileId(fileName, fileSize, lastModified);
+    }
+
     state.currentFileName = fileName;
     state.currentFileType = "image";
 
     // ブックマークが存在する場合は復元
-    const bookmark = loadBookmark(state.currentFileId);
-    if (bookmark) {
-      state.currentPage = bookmark.currentPage;
-      console.log(
-        `[Bookmark] 前回の位置から再開: ページ ${bookmark.currentPage}/${bookmark.totalPages}`,
-      );
+    if (state.currentFileId) {
+      const bookmark = loadBookmark(state.currentFileId);
+      if (bookmark) {
+        state.currentPage = bookmark.currentPage;
+        console.log(
+          `[Bookmark] 前回の位置から再開: ページ ${bookmark.currentPage}/${bookmark.totalPages}`,
+        );
+      }
     }
   }
 
@@ -326,6 +338,37 @@ async function loadImages(
 
   // ローディング非表示
   hideLoading();
+
+  // 履歴に保存（ファイル情報がある場合）
+  if (fileName && state.images.length > 0 && originalFileBlob) {
+    try {
+      const thumbnail = await generateThumbnail(state.images[0]);
+
+      // ファイルIDの決定:
+      // existingFileIdまたはstate.currentFileIdを使用
+      // どちらもない場合はエラー
+      const fileIdToSave = existingFileId || state.currentFileId;
+
+      if (!fileIdToSave) {
+        console.error(
+          "[History] fileIdが設定されていません。履歴を保存できません。",
+        );
+        return;
+      }
+
+      await saveFileHistory({
+        fileId: fileIdToSave,
+        fileName: fileName,
+        fileType: fileType, // 渡されたファイルタイプを使用（image/zip/epub/directory）
+        fileBlob: originalFileBlob, // 単一ファイルまたはファイル配列
+        thumbnail: thumbnail,
+        totalPages: state.images.length,
+      });
+      await renderRecentFiles();
+    } catch (error) {
+      console.error("[History] 履歴の保存に失敗しました:", error);
+    }
+  }
 }
 
 // 見開き調整を切り替える

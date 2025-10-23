@@ -30,6 +30,9 @@ const elements = {
   thumbnailOverlay: null,
   thumbnailGrid: null,
   thumbnailCloseBtn: null,
+  recentFilesSection: null,
+  recentFilesList: null,
+  btnClearAllHistory: null,
   bottomControls: null,
   seekbarContainer: null,
   seekbar: null,
@@ -60,6 +63,11 @@ function initElements() {
   elements.thumbnailOverlay = document.getElementById("thumbnail-overlay");
   elements.thumbnailGrid = document.getElementById("thumbnail-grid");
   elements.thumbnailCloseBtn = document.getElementById("thumbnail-close-btn");
+  elements.recentFilesSection = document.getElementById("recent-files-section");
+  elements.recentFilesList = document.getElementById("recent-files-list");
+  elements.btnClearAllHistory = document.getElementById(
+    "btn-clear-all-history",
+  );
   elements.bottomControls = document.getElementById("bottom-controls");
   elements.seekbarContainer = document.getElementById("seekbar-container");
   elements.seekbar = document.getElementById("seekbar");
@@ -92,6 +100,26 @@ function generateFileId(fileName, fileSize, lastModified) {
     hash = hash & hash; // 32bit整数に変換
   }
   return `file_${Math.abs(hash)}`;
+}
+
+// ディレクトリ用のファイル識別子を生成（全ファイルの情報を組み合わせ）
+// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
+function generateDirectoryId(dirName, files) {
+  // 全ファイルの名前、サイズ、更新日時を結合
+  // 最初の10ファイルの情報を使用（パフォーマンスのため）
+  const filesToHash = files.slice(0, 10);
+  const fileInfos = filesToHash.map(
+    (f) => `${f.name}-${f.size}-${f.lastModified}`,
+  );
+  const str = `${dirName}-${files.length}-${fileInfos.join("|")}`;
+
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // 32bit整数に変換
+  }
+  return `dir_${Math.abs(hash)}`;
 }
 
 // ブックマークを保存
