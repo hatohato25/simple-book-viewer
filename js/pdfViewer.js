@@ -1,10 +1,53 @@
 // PDFビューアーモジュール
 // このファイルで定義された関数は、グローバルスコープで他のモジュールから参照されます
 
+// 先読み用の画像オブジェクトを保持
+let pdfPreloadedImages = [];
+
 // PDFビューアーの初期化（app.jsから呼び出し）
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function initPdfViewer() {
   // 初期化時は何もしない（PDF読み込み時にイベントを設定）
+}
+
+// 次と前のページを先読みする（PDF用：左→右読み）
+function preloadAdjacentPdfPages() {
+  // 既存の先読み画像をクリア
+  pdfPreloadedImages = [];
+
+  // 次の見開き（左→右読みなので +2, +3）
+  const nextLeftIndex = state.currentPage + 2;
+  const nextRightIndex = state.currentPage + 3;
+
+  // 前の見開き（左→右読みなので -2, -1）
+  const prevLeftIndex = state.currentPage - 2;
+  const prevRightIndex = state.currentPage - 1;
+
+  // 次のページを先読み
+  if (nextLeftIndex >= 0 && nextLeftIndex < state.images.length) {
+    const img = new Image();
+    img.src = state.images[nextLeftIndex];
+    pdfPreloadedImages.push(img);
+  }
+
+  if (nextRightIndex >= 0 && nextRightIndex < state.images.length) {
+    const img = new Image();
+    img.src = state.images[nextRightIndex];
+    pdfPreloadedImages.push(img);
+  }
+
+  // 前のページを先読み
+  if (prevLeftIndex >= 0 && prevLeftIndex < state.images.length) {
+    const img = new Image();
+    img.src = state.images[prevLeftIndex];
+    pdfPreloadedImages.push(img);
+  }
+
+  if (prevRightIndex >= 0 && prevRightIndex < state.images.length) {
+    const img = new Image();
+    img.src = state.images[prevRightIndex];
+    pdfPreloadedImages.push(img);
+  }
 }
 
 // クリック領域のハンドラー（PDF用）
@@ -503,6 +546,9 @@ async function updatePdfPageDisplay() {
 
   // ブックマークボタンの状態を更新（ページ遷移時）
   updateBookmarkButton();
+
+  // 前後のページを先読み（ページ遷移を高速化）
+  preloadAdjacentPdfPages();
 }
 
 // ページ遷移

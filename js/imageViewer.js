@@ -1,10 +1,53 @@
 // 画像ビューアーモジュール
 // このファイルで定義された関数は、グローバルスコープで他のモジュールから参照されます
 
+// 先読み用の画像オブジェクトを保持
+let preloadedImages = [];
+
 // 画像ビューアーの初期化（app.jsから呼び出し）
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function initImageViewer() {
   // 初期化時は何もしない（画像読み込み時にイベントを設定）
+}
+
+// 次と前のページを先読みする
+function preloadAdjacentPages() {
+  // 既存の先読み画像をクリア
+  preloadedImages = [];
+
+  // 次の見開き（右→左読みなので -2, -1）
+  const nextRightIndex = state.currentPage - 2;
+  const nextLeftIndex = state.currentPage - 1;
+
+  // 前の見開き（右→左読みなので +2, +3）
+  const prevRightIndex = state.currentPage + 2;
+  const prevLeftIndex = state.currentPage + 3;
+
+  // 次のページを先読み
+  if (nextRightIndex >= 0 && nextRightIndex < state.images.length) {
+    const img = new Image();
+    img.src = state.images[nextRightIndex];
+    preloadedImages.push(img);
+  }
+
+  if (nextLeftIndex >= 0 && nextLeftIndex < state.images.length) {
+    const img = new Image();
+    img.src = state.images[nextLeftIndex];
+    preloadedImages.push(img);
+  }
+
+  // 前のページを先読み
+  if (prevRightIndex >= 0 && prevRightIndex < state.images.length) {
+    const img = new Image();
+    img.src = state.images[prevRightIndex];
+    preloadedImages.push(img);
+  }
+
+  if (prevLeftIndex >= 0 && prevLeftIndex < state.images.length) {
+    const img = new Image();
+    img.src = state.images[prevLeftIndex];
+    preloadedImages.push(img);
+  }
 }
 
 // クリック領域のハンドラー（画像用）
@@ -513,6 +556,9 @@ async function updatePageDisplay() {
   } else {
     elements.clickAreaNext.classList.remove("hidden");
   }
+
+  // 前後のページを先読み（ページ遷移を高速化）
+  preloadAdjacentPages();
 }
 
 // ページ遷移
