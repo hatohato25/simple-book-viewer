@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initDropZone();
   initImageViewer();
   initPdfViewer();
+  initTouchGestures();
   setupRecentFilesEvents();
   await renderRecentFiles();
 });
