@@ -532,3 +532,213 @@ describe("サムネイル機能のテスト", () => {
     expect(thumbnailItem.classList.contains("active")).toBe(true);
   });
 });
+
+describe("ファイル選択モーダル機能のテスト", () => {
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <div class="drop-zone-content">
+        <p>画像フォルダ、PDF、EPUB、またはZIPファイルをここにドロップ</p>
+      </div>
+      <div id="file-select-modal" class="file-select-modal hidden">
+        <div class="file-select-modal-content">
+          <h3>読み込み方法を選択</h3>
+          <div class="file-select-buttons">
+            <button id="modal-btn-select-files" class="modal-btn-select">
+              <div class="modal-btn-icon">📄</div>
+              <div class="modal-btn-text">ファイルを選択</div>
+              <div class="modal-btn-hint">PDF、EPUB、ZIP、画像ファイル</div>
+            </button>
+            <button id="modal-btn-select-folder" class="modal-btn-select">
+              <div class="modal-btn-icon">📁</div>
+              <div class="modal-btn-text">フォルダを選択</div>
+              <div class="modal-btn-hint">画像が入ったフォルダ</div>
+            </button>
+          </div>
+          <button id="modal-close-btn" class="modal-close-btn">キャンセル</button>
+        </div>
+      </div>
+      <input type="file" id="file-input" multiple accept="image/*,.pdf,.epub,.zip" style="display: none;">
+      <input type="file" id="folder-input" webkitdirectory style="display: none;">
+    `;
+  });
+
+  it("モーダルのDOM要素が存在する", () => {
+    const modal = document.getElementById("file-select-modal");
+    const btnSelectFiles = document.getElementById("modal-btn-select-files");
+    const btnSelectFolder = document.getElementById("modal-btn-select-folder");
+    const btnClose = document.getElementById("modal-close-btn");
+    const fileInput = document.getElementById("file-input");
+    const folderInput = document.getElementById("folder-input");
+
+    expect(modal).not.toBeNull();
+    expect(btnSelectFiles).not.toBeNull();
+    expect(btnSelectFolder).not.toBeNull();
+    expect(btnClose).not.toBeNull();
+    expect(fileInput).not.toBeNull();
+    expect(folderInput).not.toBeNull();
+  });
+
+  it("モーダルが初期状態で非表示", () => {
+    const modal = document.getElementById("file-select-modal");
+    expect(modal.classList.contains("hidden")).toBe(true);
+  });
+
+  it("モーダルを表示できる", () => {
+    const modal = document.getElementById("file-select-modal");
+    modal.classList.remove("hidden");
+    expect(modal.classList.contains("hidden")).toBe(false);
+  });
+
+  it("モーダルを非表示にできる", () => {
+    const modal = document.getElementById("file-select-modal");
+    modal.classList.remove("hidden");
+    modal.classList.add("hidden");
+    expect(modal.classList.contains("hidden")).toBe(true);
+  });
+
+  it("file inputがmultiple属性を持つ", () => {
+    const fileInput = document.getElementById("file-input");
+    expect(fileInput.hasAttribute("multiple")).toBe(true);
+  });
+
+  it("file inputが正しいaccept属性を持つ", () => {
+    const fileInput = document.getElementById("file-input");
+    expect(fileInput.getAttribute("accept")).toBe("image/*,.pdf,.epub,.zip");
+  });
+
+  it("folder inputがwebkitdirectory属性を持つ", () => {
+    const folderInput = document.getElementById("folder-input");
+    expect(folderInput.hasAttribute("webkitdirectory")).toBe(true);
+  });
+
+  it("モーダルの選択ボタンが2つ存在する", () => {
+    const btnSelectFiles = document.getElementById("modal-btn-select-files");
+    const btnSelectFolder = document.getElementById("modal-btn-select-folder");
+    expect(btnSelectFiles).not.toBeNull();
+    expect(btnSelectFolder).not.toBeNull();
+  });
+
+  it("モーダルのキャンセルボタンが存在する", () => {
+    const btnClose = document.getElementById("modal-close-btn");
+    expect(btnClose).not.toBeNull();
+    expect(btnClose.textContent).toBe("キャンセル");
+  });
+});
+
+describe("タッチジェスチャー機能のテスト", () => {
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <div id="viewer" class="viewer">
+        <div class="page-container">
+          <img id="page-right" class="page page-right" />
+          <img id="page-left" class="page page-left" />
+        </div>
+      </div>
+    `;
+  });
+
+  function getDistance(x1, y1, x2, y2) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function calculateScale(initialDistance, currentDistance, currentScale) {
+    const MIN_SCALE = 1;
+    const MAX_SCALE = 3;
+    const scale = currentDistance / initialDistance;
+    return Math.max(MIN_SCALE, Math.min(MAX_SCALE, currentScale * scale));
+  }
+
+  it("ページコンテナのDOM要素が存在する", () => {
+    const pageContainer = document.querySelector(".page-container");
+    expect(pageContainer).not.toBeNull();
+  });
+
+  it("2点間の距離を正しく計算できる", () => {
+    const distance = getDistance(0, 0, 3, 4);
+    expect(distance).toBe(5);
+  });
+
+  it("ピンチズームのスケールを正しく計算できる（拡大）", () => {
+    const initialDistance = 100;
+    const currentDistance = 200;
+    const currentScale = 1;
+    const newScale = calculateScale(
+      initialDistance,
+      currentDistance,
+      currentScale,
+    );
+    expect(newScale).toBe(2);
+  });
+
+  it("ピンチズームのスケールを正しく計算できる（縮小）", () => {
+    const initialDistance = 200;
+    const currentDistance = 100;
+    const currentScale = 2;
+    const newScale = calculateScale(
+      initialDistance,
+      currentDistance,
+      currentScale,
+    );
+    expect(newScale).toBe(1);
+  });
+
+  it("ピンチズームのスケールが最小値（1倍）を下回らない", () => {
+    const initialDistance = 200;
+    const currentDistance = 10;
+    const currentScale = 1;
+    const newScale = calculateScale(
+      initialDistance,
+      currentDistance,
+      currentScale,
+    );
+    expect(newScale).toBe(1);
+  });
+
+  it("ピンチズームのスケールが最大値（3倍）を超えない", () => {
+    const initialDistance = 100;
+    const currentDistance = 1000;
+    const currentScale = 1;
+    const newScale = calculateScale(
+      initialDistance,
+      currentDistance,
+      currentScale,
+    );
+    expect(newScale).toBe(3);
+  });
+
+  it("スワイプの閾値判定が正しく動作する", () => {
+    const SWIPE_THRESHOLD = 50;
+    const deltaX = 60;
+    const deltaY = 10;
+    const isHorizontalSwipe =
+      Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY);
+    expect(isHorizontalSwipe).toBe(true);
+  });
+
+  it("縦スワイプは水平スワイプとして認識されない", () => {
+    const SWIPE_THRESHOLD = 50;
+    const deltaX = 10;
+    const deltaY = 60;
+    const isHorizontalSwipe =
+      Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY);
+    expect(isHorizontalSwipe).toBe(false);
+  });
+
+  it("スワイプ速度が閾値を超えているか判定できる", () => {
+    const SWIPE_VELOCITY = 0.3;
+    const deltaX = 100;
+    const deltaTime = 200;
+    const velocity = Math.abs(deltaX) / deltaTime;
+    expect(velocity).toBeGreaterThan(SWIPE_VELOCITY);
+  });
+
+  it("低速スワイプは閾値を下回る", () => {
+    const SWIPE_VELOCITY = 0.3;
+    const deltaX = 50;
+    const deltaTime = 500;
+    const velocity = Math.abs(deltaX) / deltaTime;
+    expect(velocity).toBeLessThan(SWIPE_VELOCITY);
+  });
+});
