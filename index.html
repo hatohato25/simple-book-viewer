@@ -23,8 +23,24 @@
 
             <div class="drop-zone-content">
                 <p>画像フォルダ、PDF、EPUB、またはZIPファイルをここにドロップ</p>
-                <p class="hint">フォルダをそのままドロップできます</p>
+                <p class="hint">またはクリックしてファイルを選択</p>
                 <p class="hint">対応形式: JPG, PNG, GIF, WebP, AVIF, PDF, EPUB, ZIP</p>
+
+                <!-- 非表示のfile input（複数ファイル選択用） -->
+                <input
+                    type="file"
+                    id="file-input"
+                    multiple
+                    accept="image/*,.pdf,.epub,.zip"
+                    style="display: none;"
+                >
+                <!-- 非表示のfile input（フォルダ選択用） -->
+                <input
+                    type="file"
+                    id="folder-input"
+                    webkitdirectory
+                    style="display: none;"
+                >
             </div>
         </div>
 
@@ -109,6 +125,26 @@
                 <div id="thumbnail-grid" class="thumbnail-grid">
                     <!-- 動的に生成されるサムネイル -->
                 </div>
+            </div>
+        </div>
+
+        <!-- ファイル選択モーダル -->
+        <div id="file-select-modal" class="file-select-modal hidden">
+            <div class="file-select-modal-content">
+                <h3>読み込み方法を選択</h3>
+                <div class="file-select-buttons">
+                    <button id="modal-btn-select-files" class="modal-btn-select">
+                        <div class="modal-btn-icon">📄</div>
+                        <div class="modal-btn-text">ファイルを選択</div>
+                        <div class="modal-btn-hint">PDF、EPUB、ZIP、画像ファイル</div>
+                    </button>
+                    <button id="modal-btn-select-folder" class="modal-btn-select">
+                        <div class="modal-btn-icon">📁</div>
+                        <div class="modal-btn-text">フォルダを選択</div>
+                        <div class="modal-btn-hint">画像が入ったフォルダ</div>
+                    </button>
+                </div>
+                <button id="modal-close-btn" class="modal-close-btn">キャンセル</button>
             </div>
         </div>
     </div>

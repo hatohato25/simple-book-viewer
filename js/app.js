@@ -17,6 +17,62 @@ function initDropZone() {
   elements.dropZone.addEventListener("dragover", handleDragOver);
   elements.dropZone.addEventListener("dragleave", handleDragLeave);
   elements.dropZone.addEventListener("drop", handleDrop);
+
+  // クリックでモーダル表示
+  const dropZoneContent = document.querySelector(".drop-zone-content");
+  const fileSelectModal = document.getElementById("file-select-modal");
+  const modalBtnSelectFiles = document.getElementById("modal-btn-select-files");
+  const modalBtnSelectFolder = document.getElementById(
+    "modal-btn-select-folder",
+  );
+  const modalCloseBtn = document.getElementById("modal-close-btn");
+  const fileInput = document.getElementById("file-input");
+  const folderInput = document.getElementById("folder-input");
+
+  // ドロップゾーンクリックでモーダル表示
+  if (dropZoneContent && fileSelectModal) {
+    dropZoneContent.addEventListener("click", () => {
+      fileSelectModal.classList.remove("hidden");
+    });
+  }
+
+  // モーダル内のファイル選択ボタン
+  if (modalBtnSelectFiles && fileInput) {
+    modalBtnSelectFiles.addEventListener("click", () => {
+      fileInput.click();
+    });
+    fileInput.addEventListener("change", (e) => {
+      fileSelectModal.classList.add("hidden");
+      handleFileInputChange(e);
+    });
+  }
+
+  // モーダル内のフォルダ選択ボタン
+  if (modalBtnSelectFolder && folderInput) {
+    modalBtnSelectFolder.addEventListener("click", () => {
+      folderInput.click();
+    });
+    folderInput.addEventListener("change", (e) => {
+      fileSelectModal.classList.add("hidden");
+      handleFolderInputChange(e);
+    });
+  }
+
+  // モーダルのキャンセルボタン
+  if (modalCloseBtn && fileSelectModal) {
+    modalCloseBtn.addEventListener("click", () => {
+      fileSelectModal.classList.add("hidden");
+    });
+  }
+
+  // モーダル背景クリックで閉じる
+  if (fileSelectModal) {
+    fileSelectModal.addEventListener("click", (e) => {
+      if (e.target === fileSelectModal) {
+        fileSelectModal.classList.add("hidden");
+      }
+    });
+  }
 }
 
 // ドラッグオーバー
@@ -72,6 +128,57 @@ async function handleDrop(e) {
       );
       break;
   }
+}
+
+// ファイル選択（input type="file"）
+async function handleFileInputChange(e) {
+  const files = Array.from(e.target.files);
+
+  if (files.length === 0) {
+    return;
+  }
+
+  // ファイル種別を判定
+  const fileType = detectFileType(files);
+
+  // ファイル種別に応じて処理を振り分け
+  switch (fileType) {
+    case "image":
+      await handleImageFiles(files);
+      break;
+    case "pdf":
+      await handlePdfFile(files[0]);
+      break;
+    case "epub":
+      await handleEpubFile(files[0]);
+      break;
+    case "zip":
+      await handleZipFile(files[0]);
+      break;
+    default:
+      alert(
+        "対応していないファイル形式です。\n\n対応形式: 画像ファイル (JPG, PNG, GIF, WebP, AVIF), PDFファイル, EPUBファイル, ZIPファイル",
+      );
+      break;
+  }
+
+  // inputをリセット（同じファイルを再選択できるように）
+  e.target.value = "";
+}
+
+// フォルダ選択（input webkitdirectory）
+async function handleFolderInputChange(e) {
+  const files = Array.from(e.target.files);
+
+  if (files.length === 0) {
+    return;
+  }
+
+  // フォルダ内のファイルは画像ファイルとして処理
+  await handleImageFiles(files);
+
+  // inputをリセット（同じフォルダを再選択できるように）
+  e.target.value = "";
 }
 
 // 画像ファイルの処理

@@ -98,8 +98,15 @@ body {
 
 .drop-zone-content {
   text-align: center;
-  pointer-events: none;
+  pointer-events: auto;
   flex: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.drop-zone-content:hover {
+  transform: scale(1.02);
+  opacity: 0.9;
 }
 
 /* 最近読んだファイル履歴セクション */
@@ -830,4 +837,112 @@ body {
 .thumbnail-item.active .thumbnail-page-number {
   color: #4caf50;
   font-weight: bold;
+}
+
+/* ファイル選択モーダル */
+.file-select-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.file-select-modal.hidden {
+  display: none;
+  opacity: 0;
+}
+
+.file-select-modal-content {
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.file-select-modal-content h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  color: #ffffff;
+  text-align: center;
+  font-weight: 600;
+}
+
+.file-select-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-btn-select {
+  flex: 1;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: 2px solid #444;
+  padding: 1.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-btn-select:hover {
+  background-color: #333;
+  border-color: #4caf50;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.modal-btn-icon {
+  font-size: 2.5rem;
+}
+
+.modal-btn-text {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.modal-btn-hint {
+  font-size: 0.8rem;
+  color: #999;
+  text-align: center;
+}
+
+.modal-close-btn {
+  width: 100%;
+  background-color: #444;
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background-color: #555;
+}
+
+@media (max-width: 768px) {
+  .file-select-buttons {
+    flex-direction: column;
+  }
+
+  .modal-btn-select {
+    padding: 1.25rem 1rem;
+  }
 }
