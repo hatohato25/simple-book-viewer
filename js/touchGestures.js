@@ -27,16 +27,19 @@ const MAX_SCALE = 3;
  */
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 function initTouchGestures() {
-  const pageContainer = document.querySelector(".page-container");
-  if (!pageContainer) return;
+  // .viewer-containerに登録することで、.click-area要素でもタッチイベントを受け取れる
+  const viewerContainer = document.querySelector(".viewer-container");
+  if (!viewerContainer) {
+    return;
+  }
 
-  pageContainer.addEventListener("touchstart", handleTouchStart, {
+  viewerContainer.addEventListener("touchstart", handleTouchStart, {
     passive: false,
   });
-  pageContainer.addEventListener("touchmove", handleTouchMove, {
+  viewerContainer.addEventListener("touchmove", handleTouchMove, {
     passive: false,
   });
-  pageContainer.addEventListener("touchend", handleTouchEnd, {
+  viewerContainer.addEventListener("touchend", handleTouchEnd, {
     passive: false,
   });
 }
@@ -46,7 +49,9 @@ function initTouchGestures() {
  */
 function handleTouchStart(e) {
   // ビューアが非表示の場合は何もしない
-  if (elements.viewer.classList.contains("hidden")) return;
+  if (elements.viewer.classList.contains("hidden")) {
+    return;
+  }
 
   const touches = e.touches;
 
@@ -114,7 +119,9 @@ function handleTouchMove(e) {
  */
 function handleTouchEnd(e) {
   // ビューアが非表示の場合は何もしない
-  if (elements.viewer.classList.contains("hidden")) return;
+  if (elements.viewer.classList.contains("hidden")) {
+    return;
+  }
 
   if (touchState.isPinching) {
     // ピンチ終了：現在のスケールを記憶
@@ -134,10 +141,10 @@ function handleTouchEnd(e) {
       velocity > SWIPE_VELOCITY
     ) {
       if (deltaX > 0) {
-        // 右スワイプ：前のページ
+        // 右スワイプ：次のページ（右にページをめくる）
         handleSwipeRight();
       } else {
-        // 左スワイプ：次のページ
+        // 左スワイプ：前のページ（左にページをめくる）
         handleSwipeLeft();
       }
     }
@@ -147,33 +154,43 @@ function handleTouchEnd(e) {
 }
 
 /**
- * 左スワイプ（次のページ）
+ * 左スワイプ（前のページ）
+ * 左にページをめくる動作 → 前のページに戻る
  */
 function handleSwipeLeft() {
   // 画像ビューアーとPDFビューアーで処理を分ける
   if (state.currentFileType === "pdf") {
-    // PDFは左→右読みなので、左スワイプで次へ
-    navigatePdfPage(2);
+    // PDFは左→右読みなので、左スワイプで前へ
+    navigatePdfPage(-2);
   } else {
-    // 画像は右→左読みなので、左スワイプで次へ
-    navigatePage(2);
+    // 画像は右→左読みなので、左スワイプで前へ
+    navigatePage(-2);
   }
-  showControls();
+
+  // コントロール表示（imageViewer.jsに定義されている関数）
+  if (typeof showControls === "function") {
+    showControls();
+  }
 }
 
 /**
- * 右スワイプ（前のページ）
+ * 右スワイプ（次のページ）
+ * 右にページをめくる動作 → 次のページに進む
  */
 function handleSwipeRight() {
   // 画像ビューアーとPDFビューアーで処理を分ける
   if (state.currentFileType === "pdf") {
-    // PDFは左→右読みなので、右スワイプで前へ
-    navigatePdfPage(-2);
+    // PDFは左→右読みなので、右スワイプで次へ
+    navigatePdfPage(2);
   } else {
-    // 画像は右→左読みなので、右スワイプで前へ
-    navigatePage(-2);
+    // 画像は右→左読みなので、右スワイプで次へ
+    navigatePage(2);
   }
-  showControls();
+
+  // コントロール表示（imageViewer.jsに定義されている関数）
+  if (typeof showControls === "function") {
+    showControls();
+  }
 }
 
 /**
