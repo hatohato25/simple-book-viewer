@@ -102,11 +102,13 @@ function toggleFullscreen() {
 }
 
 function handleFullscreenChange() {
-  // フルスクリーン状態に応じてボタンのテキストとタイトルを変更
+  // フルスクリーン状態に応じてボタンのスタイルとタイトルを変更
   if (document.fullscreenElement) {
+    elements.btnFullscreen.classList.add("active");
     elements.btnFullscreen.textContent = "⛶";
     elements.btnFullscreen.title = "最大化表示を終了";
   } else {
+    elements.btnFullscreen.classList.remove("active");
     elements.btnFullscreen.textContent = "⛶";
     elements.btnFullscreen.title = "最大化表示";
   }

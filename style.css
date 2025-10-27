@@ -11,6 +11,9 @@ body {
   background-color: #1a1a1a;
   color: #ffffff;
   overflow: hidden;
+  /* iOS/iPadOSのセーフエリア対応 */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 #app {
@@ -353,8 +356,8 @@ body {
 
 /* 下部コントロール */
 .bottom-controls {
-  position: absolute;
-  bottom: 20px;
+  position: fixed;
+  bottom: max(20px, env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -366,21 +369,25 @@ body {
   transition:
     opacity 0.3s ease,
     transform 0.3s ease;
+  /* タッチデバイス向けの最小タッチターゲットサイズを確保 */
+  min-height: 44px;
 }
 
 .bottom-controls.visible {
   opacity: 1;
   pointer-events: auto;
-  background-color: rgba(42, 42, 42, 0.9);
+  background-color: rgba(42, 42, 42, 0.95);
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 /* 見開き調整ボタン */
 .btn-offset {
   padding: 0.5rem 1rem;
-  font-size: 0.9rem;
+  font-size: max(0.9rem, 14px);
   background-color: rgba(66, 66, 66, 0.9);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -390,6 +397,12 @@ body {
     background-color 0.3s ease,
     border-color 0.3s ease;
   white-space: nowrap;
+  /* タッチデバイス向けの最小タッチターゲットサイズ */
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-offset:hover {
@@ -422,6 +435,7 @@ body {
     transform 0.3s ease;
   transform: scaleX(1);
   transform-origin: left;
+  max-width: min(250px, 40vw);
 }
 
 .seekbar-container.hidden {
@@ -432,25 +446,30 @@ body {
 }
 
 .seekbar {
-  width: 250px;
-  height: 6px;
-  border-radius: 3px;
+  width: 100%;
+  min-width: 150px;
+  height: 8px;
+  border-radius: 4px;
   background: rgba(255, 255, 255, 0.2);
   outline: none;
   cursor: pointer;
   -webkit-appearance: none;
   direction: rtl; /* 右から左へ進行 */
+  /* タッチデバイス向けに高さを増やす */
+  touch-action: none;
 }
 
 .seekbar::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #4caf50;
   cursor: pointer;
   transition: background 0.3s ease;
+  /* タッチデバイス向けに大きくする */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .seekbar::-webkit-slider-thumb:hover {
@@ -458,13 +477,14 @@ body {
 }
 
 .seekbar::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #4caf50;
   cursor: pointer;
   border: none;
   transition: background 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .seekbar::-moz-range-thumb:hover {
@@ -472,7 +492,7 @@ body {
 }
 
 .seekbar-label {
-  font-size: 0.9rem;
+  font-size: max(0.9rem, 13px);
   color: #aaaaaa;
   text-align: center;
 }
@@ -480,7 +500,7 @@ body {
 /* 最大化ボタン */
 .btn-fullscreen {
   padding: 0.5rem 1rem;
-  font-size: 1.5rem;
+  font-size: max(1.5rem, 20px);
   background-color: rgba(66, 66, 66, 0.9);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -494,11 +514,24 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* タッチデバイス向けの最小タッチターゲットサイズ */
+  min-height: 44px;
+  min-width: 44px;
 }
 
 .btn-fullscreen:hover {
   background-color: rgba(88, 88, 88, 0.9);
   border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-fullscreen.active {
+  background-color: rgba(76, 175, 80, 0.9);
+  border-color: rgba(76, 175, 80, 0.5);
+}
+
+.btn-fullscreen.active:hover {
+  background-color: rgba(67, 160, 71, 0.9);
+  border-color: rgba(67, 160, 71, 0.5);
 }
 
 .btn-fullscreen.hidden {
@@ -520,6 +553,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* タッチデバイス向けの最小タッチターゲットサイズ */
+  min-height: 44px;
+  min-width: 44px;
 }
 
 .btn-bookmark:hover {
@@ -543,8 +579,8 @@ body {
 
 /* ブックマークアイコン（SVG） */
 .bookmark-icon {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: max(1.5rem, 20px);
+  height: max(1.5rem, 20px);
   transition: all 0.3s ease;
 }
 
@@ -581,13 +617,13 @@ body {
 
 /* リセットボタン */
 .btn-reset {
-  position: absolute;
-  top: 20px;
+  position: fixed;
+  top: max(20px, env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
   padding: 0.5rem 1.5rem;
-  font-size: 0.95rem;
-  background-color: rgba(42, 42, 42, 0.9);
+  font-size: max(0.95rem, 14px);
+  background-color: rgba(42, 42, 42, 0.95);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
@@ -599,6 +635,10 @@ body {
   z-index: 20;
   opacity: 1;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  /* タッチデバイス向けの最小タッチターゲットサイズ */
+  min-height: 44px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .btn-reset:hover {
@@ -629,22 +669,83 @@ body {
   }
 
   .bottom-controls {
-    bottom: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
     padding: 0.5rem 1rem;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .bottom-controls.visible {
+    max-width: 95vw;
   }
 
   .btn-reset {
-    top: 10px;
+    top: max(10px, env(safe-area-inset-top));
     padding: 0.4rem 1rem;
-    font-size: 0.85rem;
+    font-size: max(0.85rem, 13px);
   }
 
   .drop-zone-content p {
-    font-size: 1.2rem;
+    font-size: max(1.2rem, 16px);
   }
 
   .drop-zone-content .hint {
-    font-size: 0.9rem;
+    font-size: max(0.9rem, 13px);
+  }
+
+  .seekbar-container {
+    max-width: min(200px, 35vw);
+  }
+
+  .btn-offset,
+  .btn-fullscreen,
+  .btn-bookmark,
+  .btn-thumbnail {
+    padding: 0.4rem 0.8rem;
+  }
+
+  .viewer-container {
+    padding: 10px;
+  }
+}
+
+/* iOS/iPadOS専用の調整 */
+@supports (-webkit-touch-callout: none) {
+  body {
+    /* iOS SafariでのViewport高さの問題を修正 */
+    height: -webkit-fill-available;
+  }
+
+  #app {
+    height: -webkit-fill-available;
+  }
+
+  .bottom-controls {
+    /* iOSでのホームバー領域を考慮 */
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  /* タッチデバイス向けにホバー効果を無効化 */
+  @media (hover: none) and (pointer: coarse) {
+    .btn-offset:hover,
+    .btn-fullscreen:hover,
+    .btn-bookmark:hover,
+    .btn-thumbnail:hover,
+    .btn-reset:hover,
+    .click-area:hover {
+      background-color: inherit;
+      border-color: inherit;
+      transform: none;
+    }
+
+    .btn-offset:active,
+    .btn-fullscreen:active,
+    .btn-bookmark:active,
+    .btn-thumbnail:active,
+    .btn-reset:active {
+      opacity: 0.8;
+    }
   }
 }
 
@@ -663,6 +764,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* タッチデバイス向けの最小タッチターゲットサイズ */
+  min-height: 44px;
+  min-width: 44px;
 }
 
 .btn-thumbnail:hover {
@@ -676,8 +780,8 @@ body {
 
 /* サムネイルアイコン（SVG） */
 .thumbnail-icon {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: max(1.5rem, 20px);
+  height: max(1.5rem, 20px);
   transition: all 0.3s ease;
 }
 
