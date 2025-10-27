@@ -11,15 +11,17 @@ body {
   background-color: #1a1a1a;
   color: #ffffff;
   overflow: hidden;
-  /* iOS/iPadOSのセーフエリア対応 */
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  /* iOS/iPadOSのセーフエリア対応 - paddingではなくmarginを使用 */
+  margin: 0;
+  padding: 0;
 }
 
 #app {
   width: 100vw;
-  height: 100vh;
+  /* iOS/iPadOSのセーフエリアを考慮した実際の高さ */
+  height: 100dvh; /* dvh = dynamic viewport height (iOS対応) */
   position: relative;
+  overflow: hidden;
 }
 
 /* ローディング表示 */
@@ -116,14 +118,18 @@ body {
 .recent-files-section {
   display: flex;
   flex-direction: column;
-  max-width: 400px;
+  max-width: min(400px, 90vw);
   width: 100%;
-  height: 80vh;
+  height: min(80vh, calc(100dvh - 4rem));
+  max-height: calc(100dvh - 4rem);
   background-color: #1e1e1e;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
   pointer-events: auto;
   overflow: hidden;
+  /* iOS/iPadOSのセーフエリアを考慮 */
+  margin: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 .recent-files-section.hidden {
@@ -301,16 +307,24 @@ body {
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  padding: 20px;
+  /* レスポンシブなパディング */
+  padding: clamp(10px, 2vw, 20px);
   position: relative; /* クリック領域の配置のため */
+  /* iOS/iPadOSのセーフエリアを考慮 */
+  padding-top: max(clamp(10px, 2vw, 20px), env(safe-area-inset-top));
+  padding-bottom: max(clamp(10px, 2vw, 20px), env(safe-area-inset-bottom));
+  padding-left: max(clamp(10px, 2vw, 20px), env(safe-area-inset-left));
+  padding-right: max(clamp(10px, 2vw, 20px), env(safe-area-inset-right));
 }
 
 .page-container {
   display: flex;
   flex-direction: row-reverse; /* 右ページを右側に、左ページを左側に */
-  gap: 10px;
+  gap: clamp(5px, 1vw, 10px);
   width: 100%;
   height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   justify-content: center;
   align-items: center;
 }
@@ -319,6 +333,8 @@ body {
   flex: 0 1 auto;
   max-width: 50%;
   max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
@@ -656,12 +672,12 @@ body {
 @media (max-width: 768px) {
   .page-container {
     flex-direction: column;
-    gap: 5px;
+    gap: clamp(3px, 0.5vw, 5px);
   }
 
   .page {
-    max-width: 90%;
-    max-height: 45vh;
+    max-width: 95%;
+    max-height: 48vh;
   }
 
   .click-area {
@@ -686,12 +702,33 @@ body {
     font-size: max(0.85rem, 13px);
   }
 
+  .drop-zone {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
   .drop-zone-content p {
     font-size: max(1.2rem, 16px);
   }
 
   .drop-zone-content .hint {
     font-size: max(0.9rem, 13px);
+  }
+
+  .recent-files-section {
+    max-width: 95vw;
+    height: auto;
+    max-height: 60vh;
+  }
+
+  .recent-file-card {
+    padding: 0.75rem;
+  }
+
+  .recent-file-thumbnail {
+    width: 50px;
+    height: 66px;
   }
 
   .seekbar-container {
@@ -706,24 +743,70 @@ body {
   }
 
   .viewer-container {
-    padding: 10px;
+    padding: clamp(5px, 1.5vw, 10px);
+    /* モバイルでのセーフエリア対応を強化 */
+    padding-top: max(clamp(5px, 1.5vw, 10px), env(safe-area-inset-top));
+    padding-bottom: max(
+      clamp(5px, 1.5vw, 10px),
+      calc(env(safe-area-inset-bottom) + 60px)
+    );
+    padding-left: max(clamp(5px, 1.5vw, 10px), env(safe-area-inset-left));
+    padding-right: max(clamp(5px, 1.5vw, 10px), env(safe-area-inset-right));
   }
 }
 
 /* iOS/iPadOS専用の調整 */
 @supports (-webkit-touch-callout: none) {
-  body {
+  :root {
     /* iOS SafariでのViewport高さの問題を修正 */
-    height: -webkit-fill-available;
+    --app-height: -webkit-fill-available;
+  }
+
+  body {
+    min-height: var(--app-height, 100vh);
   }
 
   #app {
-    height: -webkit-fill-available;
+    min-height: var(--app-height, 100vh);
+  }
+
+  .viewer-container {
+    /* iOSでのはみ出し防止 */
+    max-width: 100vw;
+    max-height: calc(
+      100vh -
+      env(safe-area-inset-top) -
+      env(safe-area-inset-bottom)
+    );
+  }
+
+  .page-container {
+    /* iOSでのはみ出し防止 */
+    max-width: calc(
+      100vw -
+      env(safe-area-inset-left) -
+      env(safe-area-inset-right)
+    );
+    max-height: calc(
+      100vh -
+      env(safe-area-inset-top) -
+      env(safe-area-inset-bottom)
+    );
   }
 
   .bottom-controls {
     /* iOSでのホームバー領域を考慮 */
     padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .recent-files-section {
+    /* iOSでの表示領域を適切に制限 */
+    max-height: calc(
+      100vh -
+      env(safe-area-inset-top) -
+      env(safe-area-inset-bottom) -
+      4rem
+    );
   }
 
   /* タッチデバイス向けにホバー効果を無効化 */
