@@ -529,6 +529,7 @@ async function updatePdfPageDisplay() {
   // シークバーを更新
   elements.seekbar.value = currentPageNumber;
   elements.seekbarCurrent.textContent = currentPageNumber;
+  updatePdfSeekbarProgress();
 
   // クリック領域の表示/非表示を更新
   // PDFは左から右に読むため、画像ビューアと逆
@@ -619,10 +620,20 @@ function resetPdfViewer() {
   elements.bottomControls.classList.remove("visible");
 }
 
+// シークバーのプログレス表示を更新（PDF用）
+function updatePdfSeekbarProgress() {
+  const seekbar = elements.seekbar;
+  const value =
+    ((seekbar.value - seekbar.min) / (seekbar.max - seekbar.min)) * 100;
+  // PDFはLTR（左から右）なので、そのまま値を使用
+  seekbar.style.setProperty("--seekbar-value", `${value}%`);
+}
+
 // シークバーの入力処理（リアルタイム更新）
 function handlePdfSeekbarInput(e) {
   const pageNumber = Number.parseInt(e.target.value, 10);
   elements.seekbarCurrent.textContent = pageNumber;
+  updatePdfSeekbarProgress();
 }
 
 // シークバーの変更処理（ページ遷移）

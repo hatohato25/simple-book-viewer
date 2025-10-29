@@ -367,6 +367,8 @@ async function loadImages(
 
   // シークバーを右から左（RTL）に設定
   elements.seekbar.style.direction = "rtl";
+  // 画像ビューア用のプログレス表示（右側が既読、左側が未読）
+  elements.seekbar.classList.add("rtl-progress");
 
   // ページコンテナを右から左（row-reverse）に設定
   const pageContainer = document.querySelector(".page-container");
@@ -540,6 +542,7 @@ async function updatePageDisplay() {
   // シークバーを更新
   elements.seekbar.value = currentPageNumber;
   elements.seekbarCurrent.textContent = currentPageNumber;
+  updateSeekbarProgress();
 
   // ブックマークボタンの状態を更新（ページ遷移時）
   updateBookmarkButton();
@@ -620,6 +623,8 @@ function resetViewer() {
   elements.btnOffset.classList.add("hidden");
   elements.btnReset.classList.add("hidden");
   elements.bottomControls.classList.remove("visible");
+  // シークバーのRTLプログレスクラスを削除
+  elements.seekbar.classList.remove("rtl-progress");
 }
 
 // コントロール（シークバーとリセットボタン）を表示
@@ -682,10 +687,21 @@ function handleDocumentClick(e) {
   }
 }
 
+// シークバーのプログレス表示を更新
+function updateSeekbarProgress() {
+  const seekbar = elements.seekbar;
+  const value =
+    ((seekbar.value - seekbar.min) / (seekbar.max - seekbar.min)) * 100;
+  // imageViewerはRTL（右から左）読みなので、既読部分は右側
+  // CSSのlinear-gradientは左から右方向なので、100%から引いて反転
+  seekbar.style.setProperty("--seekbar-value", `${100 - value}%`);
+}
+
 // シークバーの入力処理（リアルタイム更新）
 function handleSeekbarInput(e) {
   const pageNumber = Number.parseInt(e.target.value, 10);
   elements.seekbarCurrent.textContent = pageNumber;
+  updateSeekbarProgress();
 }
 
 // シークバーの変更処理（ページ遷移）

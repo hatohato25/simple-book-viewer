@@ -466,7 +466,7 @@ body {
   min-width: 150px;
   height: 8px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
   outline: none;
   cursor: pointer;
   -webkit-appearance: none;
@@ -475,6 +475,33 @@ body {
   touch-action: none;
 }
 
+/* Webkit (Chrome, Safari, Edge) のトラック - PDFビューア用（左から右） */
+.seekbar::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(
+    to right,
+    #4caf50 0%,
+    #4caf50 var(--seekbar-value, 0%),
+    rgba(255, 255, 255, 0.2) var(--seekbar-value, 0%),
+    rgba(255, 255, 255, 0.2) 100%
+  );
+  transition: background 0.1s ease;
+}
+
+/* Webkit のトラック - 画像ビューア用（右から左）*/
+.seekbar.rtl-progress::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.2) var(--seekbar-value, 0%),
+    #4caf50 var(--seekbar-value, 0%),
+    #4caf50 100%
+  );
+}
+
+/* Webkit のつまみ */
 .seekbar::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -486,12 +513,29 @@ body {
   transition: background 0.3s ease;
   /* タッチデバイス向けに大きくする */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin-top: -6px; /* トラックの中央に配置 */
 }
 
 .seekbar::-webkit-slider-thumb:hover {
   background: #45a049;
 }
 
+/* Firefox のトラック */
+.seekbar::-moz-range-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Firefox の進捗部分 */
+.seekbar::-moz-range-progress {
+  height: 8px;
+  border-radius: 4px;
+  background: #4caf50;
+}
+
+/* Firefox のつまみ */
 .seekbar::-moz-range-thumb {
   width: 20px;
   height: 20px;
