@@ -53,12 +53,10 @@ function preloadAdjacentPages() {
 // クリック領域のハンドラー（画像用）
 function handleImageClickPrev() {
   navigatePage(-2);
-  showControls();
 }
 
 function handleImageClickNext() {
   navigatePage(2);
-  showControls();
 }
 
 // マウスホイールのハンドラー（画像用：右→左読み）
@@ -75,8 +73,6 @@ function handleImageWheel(e) {
   } else if (e.deltaY < 0) {
     navigatePage(-2); // 前のページ
   }
-
-  showControls();
 }
 
 // フルスクリーンハンドラー

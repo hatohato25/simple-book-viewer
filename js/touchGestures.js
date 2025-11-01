@@ -166,11 +166,6 @@ function handleSwipeLeft() {
     // 画像は右→左読みなので、左スワイプで前へ
     navigatePage(-2);
   }
-
-  // コントロール表示（imageViewer.jsに定義されている関数）
-  if (typeof showControls === "function") {
-    showControls();
-  }
 }
 
 /**
@@ -185,11 +180,6 @@ function handleSwipeRight() {
   } else {
     // 画像は右→左読みなので、右スワイプで次へ
     navigatePage(2);
-  }
-
-  // コントロール表示（imageViewer.jsに定義されている関数）
-  if (typeof showControls === "function") {
-    showControls();
   }
 }
 

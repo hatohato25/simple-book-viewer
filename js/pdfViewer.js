@@ -53,12 +53,10 @@ function preloadAdjacentPdfPages() {
 // クリック領域のハンドラー（PDF用）
 function handlePdfClickPrev() {
   navigatePdfPage(2); // 右側をクリック → 次のページ
-  showControls();
 }
 
 function handlePdfClickNext() {
   navigatePdfPage(-2); // 左側をクリック → 前のページ
-  showControls();
 }
 
 // マウスホイールのハンドラー（PDF用：左→右読み）
@@ -75,8 +73,6 @@ function handlePdfWheel(e) {
   } else if (e.deltaY < 0) {
     navigatePdfPage(-2); // 前のページ
   }
-
-  showControls();
 }
 
 // フルスクリーンハンドラー（PDF用）
