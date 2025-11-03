@@ -3,9 +3,10 @@
 ブラウザで利用できるシンプルな電子書籍ビューアー。画像ファイル、PDF、EPUB、ZIPファイルを見開き表示できます。
 
 ## [DEMO](https://hatohato25.github.io/simple-book-viewer/)
-<img width="1668" height="1293" alt="スクリーンショット 2025-10-17 3 38 05" src="https://github.com/user-attachments/assets/e0acf720-520c-49f8-acf2-b4ba96f0325f" style="width: 40%;" />
-<img width="1655" height="1289" alt="スクリーンショット 2025-10-17 3 42 02" src="https://github.com/user-attachments/assets/9fe346db-04ec-4a8d-b91c-135702ca3abf" style="width: 40%;" />
-
+<img width="2212" height="1294" alt="スクリーンショット 2025-11-03 14 03 54" src="https://github.com/user-attachments/assets/0236596f-0941-4e31-92bc-9d8ca5578710" style="width: 40%;" />
+<img width="2207" height="1294" alt="スクリーンショット 2025-11-03 14 04 20" src="https://github.com/user-attachments/assets/64fd2ec2-3745-4bd0-9eb9-82b841228526" style="width: 40%;" />
+<img width="1932" height="1295" alt="スクリーンショット 2025-11-03 14 06 43" src="https://github.com/user-attachments/assets/6d91ef96-5957-4ee0-9e27-2e06cc4f61f6" style="width: 40%;" />
+<img width="1840" height="1282" alt="スクリーンショット 2025-11-03 14 07 10" src="https://github.com/user-attachments/assets/6ea55e84-49e1-48ca-99ae-ccbc19be588d" style="width: 40%;" />
 
 ## 機能
 
