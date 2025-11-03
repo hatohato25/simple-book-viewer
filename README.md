@@ -38,7 +38,25 @@
 
 ## 使い方
 
-### 1. ローカルサーバーを起動
+### 1. GitHub Pagesで利用（推奨）
+
+このリポジトリをforkして、自分専用のビューアを無料で公開できます。
+
+1. このリポジトリを[fork](https://github.com/hatohato25/simple-book-viewer/fork)します
+2. forkしたリポジトリの「Settings」→「Pages」を開きます
+3. 「Source」で「Deploy from a branch」を選択
+4. 「Branch」で「main」ブランチと「/(root)」を選択し「Save」をクリック
+5. 数分待つと、`https://<あなたのユーザー名>.github.io/simple-book-viewer/`でアクセスできます
+
+**メリット**:
+- インストール不要でブラウザから直接利用可能
+- スマートフォンやタブレットからもアクセス可能
+- 自分専用のURLで、いつでもどこでも読書できる
+- ファイル履歴機能により、端末内にデータを保存して続きから読める
+
+**注意**: GitHub Pagesは静的サイトホスティングサービスです。アップロードしたファイルはあなたのブラウザのIndexedDBに保存され、他の端末と同期されません。
+
+### 2. ローカルサーバーを起動
 
 ```bash
 npm install
@@ -49,7 +67,7 @@ npm start
 
 **重要**: ファイル直接開き（file://）では動作しません。必ずローカルサーバー経由でアクセスしてください。
 
-### 2. ファイルを読み込む
+### 3. ファイルを読み込む
 
 #### 最近読んだファイルから開く
 1. ブラウザを開くと、最近読んだファイルの履歴が表示されます
@@ -82,7 +100,7 @@ npm start
 1. EPUBファイルをブラウザのドロップゾーンにドラッグ&ドロップ
 2. EPUB内の画像が自動的に抽出され、表示されます
 
-### 3. ページ操作
+### 4. ページ操作
 
 - **クリック領域**: 画面左右をクリックしてページ移動
 - **キーボード**:
@@ -98,90 +116,6 @@ npm start
 - **ブックマーク**: 下部のリボンアイコンで現在のページを保存
 - **サムネイル**: 下部のグリッドアイコンで全ページ一覧を表示
 - **リセット**: 上部の「閉じる」ボタンで別のファイルを読み込む
-
-## 開発
-
-### コマンド
-
-```bash
-# ローカルサーバー起動
-npm start
-
-# テスト実行
-npm test
-
-# テスト（監視モード）
-npm run test:watch
-
-# テストUI
-npm run test:ui
-
-# コードフォーマット
-npm run format
-
-# Lint
-npm run lint
-```
-
-### プロジェクト構成
-
-```
-book-viewer/
-├── index.html          # メインHTML
-├── style.css           # スタイルシート
-├── js/                # JavaScriptモジュール
-│   ├── state.js       # 状態管理・LocalStorage
-│   ├── utils.js       # ユーティリティ関数
-│   ├── fileHistory.js # ファイル履歴管理（IndexedDB）
-│   ├── recentFiles.js # 履歴UI管理
-│   ├── imageViewer.js # 画像ビューア（RTL）
-│   ├── pdfViewer.js   # PDFビューア（LTR）
-│   ├── thumbnail.js   # サムネイル表示機能
-│   ├── touchGestures.js # タッチジェスチャー機能
-│   └── app.js         # メインコントローラー
-├── tests/             # ユニットテスト
-│   └── app.test.js
-├── .claude/           # プロジェクト管理
-│   ├── requirements.md
-│   ├── design.md
-│   └── future-features.md
-├── package.json
-└── README.md
-```
-
-### アーキテクチャ
-
-#### モジュール構成
-
-- **state.js**: アプリケーション状態とDOM要素の管理、ブックマーク機能（LocalStorage）
-- **utils.js**: ファイル処理、ソート、ファイルタイプ判定などのユーティリティ
-- **fileHistory.js**: ファイル履歴管理（IndexedDB）、Blob保存/読み込み
-- **recentFiles.js**: 履歴UI管理、カード生成、イベント処理
-- **imageViewer.js**: 画像ファイル用のビューアロジック（右→左読み）
-- **pdfViewer.js**: PDFファイル用のビューアロジック（左→右読み）
-- **thumbnail.js**: サムネイル表示、ページジャンプ、ホイールイベント制御
-- **touchGestures.js**: タッチジェスチャー機能（スワイプ、ピンチズーム）
-- **app.js**: メインコントローラー、ファイルタイプ判定と振り分け
-
-#### イベント管理
-
-各ビューア（imageViewer/pdfViewer）は独立したイベントリスナーを持ち、ファイルタイプに応じて動的に登録・削除されます。これにより、画像とPDFで異なる操作性を実現しています。
-
-#### データ永続化
-
-- **ブックマーク**: LocalStorageにファイルごとの読書位置を保存
-- **ファイル履歴**: IndexedDBにファイル全体をBlob形式で保存（最大10件）
-- **ファイル識別**: ファイル名+サイズ+更新日時からハッシュを生成して同一ファイルを識別
-
-## 技術スタック
-
-- **フロントエンド**: Vanilla JavaScript (ES6+)
-- **スタイル**: CSS3
-- **PDF表示**: PDF.js v3.11.174 (CDN)
-- **ZIP展開**: JSZip v3.10.1 (CDN)
-- **テスト**: Vitest + happy-dom
-- **Lint/Format**: Biome
-- **開発サーバー**: http-server
 
 ## ブラウザ対応
 
@@ -221,21 +155,6 @@ book-viewer/
 
 - **原因**: ZIPファイル内に画像ファイルが含まれていない
 - **解決**: JPG, PNG, GIF, WebP, AVIFのいずれかの形式の画像ファイルを含むZIPファイルを使用してください
-
-## デバッグ
-
-開発者ツール（F12）のConsoleタブを開くと、詳細なログが表示されます：
-
-- `[Init]`: 初期化処理
-- `[Drop]`: ファイルドロップ
-- `[Collect]`: ファイル収集
-- `[ZIP]`: ZIP展開処理
-- `[EPUB]`: EPUB展開処理
-- `[Load]`: 画像読み込み
-- `[Display]`: ページ表示
-- `[Navigate]`: ページ遷移
-- `[PDF]`: PDF処理
-- `[Bookmark]`: ブックマーク保存/読み込み
 
 ## ライセンス
 
