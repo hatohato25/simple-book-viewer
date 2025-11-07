@@ -2,28 +2,83 @@
 // このファイルで定義された関数は、グローバルスコープで他のモジュールから参照されます
 
 // 画像ファイルかどうかチェック（app.jsから呼び出し）
+// iOS/iPadOSでも正確に判定できるよう、MIMEタイプも確認する
 function isImageFile(file) {
   const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"];
   const fileName = file.name.toLowerCase();
-  return imageExtensions.some((ext) => fileName.endsWith(ext));
+  const mimeType = file.type.toLowerCase();
+
+  // ファイル名の拡張子で判定
+  if (imageExtensions.some((ext) => fileName.endsWith(ext))) {
+    return true;
+  }
+
+  // MIMEタイプで判定（iOS/iPadOSでファイル名が取得できない場合に有効）
+  if (mimeType.startsWith("image/")) {
+    return true;
+  }
+
+  return false;
 }
 
 // PDFファイルかどうかチェック（app.jsから呼び出し）
+// iOS/iPadOSでも正確に判定できるよう、MIMEタイプも確認する
 function isPdfFile(file) {
   const fileName = file.name.toLowerCase();
-  return fileName.endsWith(".pdf");
+  const mimeType = file.type.toLowerCase();
+
+  // ファイル名の拡張子で判定
+  if (fileName.endsWith(".pdf")) {
+    return true;
+  }
+
+  // MIMEタイプで判定（iOS/iPadOSでファイル名が取得できない場合に有効）
+  if (mimeType === "application/pdf") {
+    return true;
+  }
+
+  return false;
 }
 
 // ZIPファイルかどうかチェック（app.jsから呼び出し）
+// iOS/iPadOSでも正確に判定できるよう、MIMEタイプも確認する
 function isZipFile(file) {
   const fileName = file.name.toLowerCase();
-  return fileName.endsWith(".zip");
+  const mimeType = file.type.toLowerCase();
+
+  // ファイル名の拡張子で判定
+  if (fileName.endsWith(".zip")) {
+    return true;
+  }
+
+  // MIMEタイプで判定（iOS/iPadOSでファイル名が取得できない場合に有効）
+  if (
+    mimeType === "application/zip" ||
+    mimeType === "application/x-zip-compressed"
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 // EPUBファイルかどうかチェック（app.jsから呼び出し）
+// iOS/iPadOSでも正確に判定できるよう、MIMEタイプも確認する
 function isEpubFile(file) {
   const fileName = file.name.toLowerCase();
-  return fileName.endsWith(".epub");
+  const mimeType = file.type.toLowerCase();
+
+  // ファイル名の拡張子で判定
+  if (fileName.endsWith(".epub")) {
+    return true;
+  }
+
+  // MIMEタイプで判定（iOS/iPadOSでファイル名が取得できない場合に有効）
+  if (mimeType === "application/epub+zip") {
+    return true;
+  }
+
+  return false;
 }
 
 // EPUBファイルから画像ファイルを展開（app.jsから呼び出し）
