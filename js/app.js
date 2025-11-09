@@ -122,9 +122,12 @@ async function handleDrop(e) {
     case "zip":
       await handleZipFile(files[0]);
       break;
+    case "rar":
+      await handleRarFile(files[0]);
+      break;
     default:
       alert(
-        "対応していないファイル形式です。\n\n対応形式: 画像ファイル (JPG, PNG, GIF, WebP, AVIF), PDFファイル, EPUBファイル, ZIPファイル",
+        "対応していないファイル形式です。\n\n対応形式: 画像ファイル (JPG, PNG, GIF, WebP, AVIF), PDFファイル, EPUBファイル, ZIP/RARファイル",
       );
       break;
   }
@@ -155,9 +158,12 @@ async function handleFileInputChange(e) {
     case "zip":
       await handleZipFile(files[0]);
       break;
+    case "rar":
+      await handleRarFile(files[0]);
+      break;
     default:
       alert(
-        "対応していないファイル形式です。\n\n対応形式: 画像ファイル (JPG, PNG, GIF, WebP, AVIF), PDFファイル, EPUBファイル, ZIPファイル",
+        "対応していないファイル形式です。\n\n対応形式: 画像ファイル (JPG, PNG, GIF, WebP, AVIF), PDFファイル, EPUBファイル, ZIP/RARファイル",
       );
       break;
   }
@@ -297,5 +303,26 @@ async function handleZipFile(file, existingFileId = null) {
   } catch (error) {
     console.error("[ZIP] ZIP処理エラー:", error);
     alert("ZIPファイルの処理に失敗しました。");
+  }
+}
+
+// RARファイルの処理
+async function handleRarFile(file, existingFileId = null) {
+  try {
+    // RARファイルから画像を展開
+    const imageFiles = await extractImagesFromRar(file);
+
+    if (imageFiles.length === 0) {
+      alert(
+        "RARファイル内に画像ファイルが見つかりませんでした。\n\n対応形式: JPG, PNG, GIF, WebP, AVIF",
+      );
+      return;
+    }
+
+    // 展開した画像を画像ビューアーで表示（元のRARファイル情報を渡す）
+    await handleImageFiles(imageFiles, file, "rar", existingFileId);
+  } catch (error) {
+    console.error("[RAR] RAR処理エラー:", error);
+    alert("RARファイルの処理に失敗しました。");
   }
 }

@@ -81,6 +81,29 @@ function isEpubFile(file) {
   return false;
 }
 
+// RARファイルかどうかチェック（app.jsから呼び出し）
+// iOS/iPadOSでも正確に判定できるよう、MIMEタイプも確認する
+function isRarFile(file) {
+  const fileName = file.name.toLowerCase();
+  const mimeType = file.type.toLowerCase();
+
+  // ファイル名の拡張子で判定
+  if (fileName.endsWith(".rar")) {
+    return true;
+  }
+
+  // MIMEタイプで判定（iOS/iPadOSでファイル名が取得できない場合に有効）
+  if (
+    mimeType === "application/vnd.rar" ||
+    mimeType === "application/x-rar-compressed" ||
+    mimeType === "application/x-rar"
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 // EPUBファイルから画像ファイルを展開（app.jsから呼び出し）
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 async function extractImagesFromEpub(epubFile) {
@@ -145,6 +168,40 @@ async function extractImagesFromZip(zipFile) {
     return imageFiles;
   } catch (error) {
     console.error("[ZIP] ZIP展開エラー:", error);
+    throw error;
+  }
+}
+
+// RARファイルから画像ファイルを展開（app.jsから呼び出し）
+// biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
+async function extractImagesFromRar(rarFile) {
+  try {
+    // Unarchiver.jsを使用してRARファイルを開く
+    const archive = await Unarchiver.open(rarFile);
+    const imageFiles = [];
+
+    // アーカイブ内のすべてのエントリを走査
+    for (const entry of archive.entries) {
+      // ディレクトリはスキップ
+      if (!entry.is_file) continue;
+
+      // 画像ファイルかチェック
+      const lowerFilename = entry.name.toLowerCase();
+      const isImage = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"].some(
+        (ext) => lowerFilename.endsWith(ext),
+      );
+
+      if (isImage) {
+        // Fileオブジェクトとして取得
+        const file = await entry.read();
+        imageFiles.push(file);
+      }
+    }
+
+    console.log(`[RAR] ${imageFiles.length}個の画像ファイルを展開しました`);
+    return imageFiles;
+  } catch (error) {
+    console.error("[RAR] RAR展開エラー:", error);
     throw error;
   }
 }
@@ -300,6 +357,12 @@ function detectFileType(files) {
   const epubFiles = files.filter(isEpubFile);
   if (epubFiles.length === 1 && files.length === 1) {
     return "epub";
+  }
+
+  // RARファイルかチェック（単一ファイル）
+  const rarFiles = files.filter(isRarFile);
+  if (rarFiles.length === 1 && files.length === 1) {
+    return "rar";
   }
 
   // ZIPファイルかチェック（単一ファイル）

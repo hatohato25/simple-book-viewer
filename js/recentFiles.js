@@ -166,6 +166,9 @@ async function handleRecentFileClick(fileId) {
     case "zip":
       await handleZipFile(file, fileId);
       break;
+    case "rar":
+      await handleRarFile(file, fileId);
+      break;
     case "directory":
       // ディレクトリの場合、fileは配列
       await handleImageFiles(file, null, "directory", fileId);

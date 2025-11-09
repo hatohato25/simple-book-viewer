@@ -24,16 +24,16 @@
             </div>
 
             <div class="drop-zone-content">
-                <p>画像フォルダ、PDF、EPUB、またはZIPファイルをここにドロップ</p>
+                <p>画像フォルダ、PDF、EPUB、ZIP、またはRARファイルをここにドロップ</p>
                 <p class="hint">またはクリックしてファイルを選択</p>
-                <p class="hint">対応形式: JPG, PNG, GIF, WebP, AVIF, PDF, EPUB, ZIP</p>
+                <p class="hint">対応形式: JPG, PNG, GIF, WebP, AVIF, PDF, EPUB, ZIP, RAR</p>
 
                 <!-- 非表示のfile input（複数ファイル選択用） -->
                 <input
                     type="file"
                     id="file-input"
                     multiple
-                    accept="image/*,.pdf,.epub,.zip"
+                    accept="image/*,.pdf,.epub,.zip,.rar"
                     style="display: none;"
                 >
                 <!-- 非表示のfile input（フォルダ選択用） -->
@@ -161,6 +161,9 @@
 
     <!-- JSZip ライブラリ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <!-- Unarchiver.js ライブラリ（RAR対応） -->
+    <script src="https://xenova.github.io/unarchiver.js/dist/unarchiver.min.js"></script>
 
     <script src="js/state.js"></script>
     <script src="js/utils.js"></script>
