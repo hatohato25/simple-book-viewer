@@ -154,34 +154,34 @@ function handleTouchEnd(e) {
 }
 
 /**
- * 左スワイプ
- * 画像（RTL）: 次のページへ進む
- * PDF（LTR）: 前のページに戻る
+ * 左スワイプ（右から左へのフリック）
+ * 画像（RTL）: 前のページに戻る
+ * PDF（LTR）: 次のページへ進む
  */
 function handleSwipeLeft() {
   // 画像ビューアーとPDFビューアーで処理を分ける
   if (state.currentFileType === "pdf") {
-    // PDFは左→右読みなので、左スワイプで前へ
-    navigatePdfPage(-2);
+    // PDFは左→右読みなので、左スワイプ（右→左フリック）で次へ
+    navigatePdfPage(2);
   } else {
-    // 画像は右→左読みなので、左スワイプで次へ
-    navigatePage(2);
+    // 画像は右→左読みなので、左スワイプ（右→左フリック）で前へ
+    navigatePage(-2);
   }
 }
 
 /**
- * 右スワイプ
- * 画像（RTL）: 前のページに戻る
- * PDF（LTR）: 次のページへ進む
+ * 右スワイプ（左から右へのフリック）
+ * 画像（RTL）: 次のページへ進む
+ * PDF（LTR）: 前のページに戻る
  */
 function handleSwipeRight() {
   // 画像ビューアーとPDFビューアーで処理を分ける
   if (state.currentFileType === "pdf") {
-    // PDFは左→右読みなので、右スワイプで次へ
-    navigatePdfPage(2);
+    // PDFは左→右読みなので、右スワイプ（左→右フリック）で前へ
+    navigatePdfPage(-2);
   } else {
-    // 画像は右→左読みなので、右スワイプで前へ
-    navigatePage(-2);
+    // 画像は右→左読みなので、右スワイプ（左→右フリック）で次へ
+    navigatePage(2);
   }
 }
 
