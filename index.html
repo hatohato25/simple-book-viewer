@@ -153,14 +153,14 @@
 
     <!-- スクリプトの読み込み順序が重要 -->
     <!-- PDF.js ライブラリ -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous"></script>
     <script>
         // PDF.js workerの設定
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
 
     <!-- JSZip ライブラリ -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
 
     <!-- Unarchiver.js ライブラリ（RAR対応） -->
     <!-- 注: COOP/COEP環境ではローカルファイルを使用 -->
@@ -176,7 +176,7 @@
     <script src="js/pdfViewer.js"></script>
     <script src="js/app.js"></script>
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6R6QHEVG07"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6R6QHEVG07" crossorigin="anonymous"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}

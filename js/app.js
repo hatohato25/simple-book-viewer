@@ -10,6 +10,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupRecentFilesEvents();
   await renderRecentFiles();
 
+  // SharedArrayBufferの確認
+  console.log("[Init] SharedArrayBuffer:", typeof SharedArrayBuffer !== 'undefined');
+  console.log("[Init] crossOriginIsolated:", self.crossOriginIsolated);
+
   // Unarchiver.jsの初期化（RAR対応）
   // 注: libunrar.js.memファイルのパスを正しく設定するため、事前にロードする
   try {
