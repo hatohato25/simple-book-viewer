@@ -9,6 +9,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   initTouchGestures();
   setupRecentFilesEvents();
   await renderRecentFiles();
+
+  // Unarchiver.jsの初期化（RAR対応）
+  // 注: libunrar.js.memファイルのパスを正しく設定するため、事前にロードする
+  try {
+    await Unarchiver.load(["rar"]);
+    console.log("[Init] RAR形式のサポートを初期化しました");
+  } catch (error) {
+    console.warn("[Init] RAR形式の初期化に失敗しました:", error);
+  }
 });
 
 // ドロップゾーンの初期化
@@ -323,6 +332,14 @@ async function handleRarFile(file, existingFileId = null) {
     await handleImageFiles(imageFiles, file, "rar", existingFileId);
   } catch (error) {
     console.error("[RAR] RAR処理エラー:", error);
-    alert("RARファイルの処理に失敗しました。");
+
+    // エラーの種類に応じて適切なメッセージを表示
+    if (error.name === "RarNotSupportedError") {
+      alert(error.message);
+    } else {
+      alert(
+        "RARファイルの処理に失敗しました。\n\nZIP形式での再試行をお勧めします。",
+      );
+    }
   }
 }

@@ -177,6 +177,8 @@ async function extractImagesFromZip(zipFile) {
 async function extractImagesFromRar(rarFile) {
   try {
     // Unarchiver.jsを使用してRARファイルを開く
+    // 注: GitHub Pagesなどの静的ホスティングでは、SharedArrayBufferが利用できないため
+    // マルチスレッド版のWASMが動作しない場合があります
     const archive = await Unarchiver.open(rarFile);
     const imageFiles = [];
 
@@ -202,6 +204,20 @@ async function extractImagesFromRar(rarFile) {
     return imageFiles;
   } catch (error) {
     console.error("[RAR] RAR展開エラー:", error);
+
+    // pthread関連のエラーの場合は、より詳しいエラーメッセージを投げる
+    const errorMessage = error?.message || String(error);
+    if (errorMessage.includes("pthread") || errorMessage.includes("abort")) {
+      const detailedError = new Error(
+        "RAR展開機能は現在の環境では利用できません。\n" +
+          "代わりにZIP形式をご利用ください。\n\n" +
+          "技術的詳細: WebAssemblyのマルチスレッド機能が利用できないため、" +
+          "RAR形式のファイル展開ができません。",
+      );
+      detailedError.name = "RarNotSupportedError";
+      throw detailedError;
+    }
+
     throw error;
   }
 }

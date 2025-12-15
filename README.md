@@ -160,6 +160,73 @@ npm start
 - **原因**: アーカイブ内に画像ファイルが含まれていない
 - **解決**: JPG, PNG, GIF, WebP, AVIFのいずれかの形式の画像ファイルを含むアーカイブを使用してください
 
+## Vercelへのデプロイ（RAR対応版）
+
+RAR形式のファイル展開を有効にするには、SharedArrayBufferをサポートするホスティング環境が必要です。
+GitHub PagesではCOOP/COEPヘッダーを設定できないため、Vercelを使用します。
+
+### 前提条件
+
+- GitHubアカウント
+- Vercelアカウント（無料）
+
+### デプロイ手順
+
+1. **Vercelにログイン**
+   - https://vercel.com/ にアクセス
+   - GitHubアカウントで連携
+
+2. **新しいプロジェクトを作成**
+   - "Add New..." → "Project" をクリック
+   - GitHubリポジトリを選択（例: `hatohato25/simple-book-viewer`）
+
+3. **デプロイ設定**
+   - Framework Preset: "Other"（静的サイト）
+   - Root Directory: `./`（デフォルト）
+   - Build Command: 空欄（ビルド不要）
+   - Output Directory: `./`（デフォルト）
+   - "Deploy" をクリック
+
+4. **デプロイ完了**
+   - 数分でデプロイ完了
+   - 提供されたURLにアクセス（例: `https://your-project.vercel.app`）
+
+### COOP/COEPヘッダーの確認
+
+`vercel.json` ファイルに以下のヘッダー設定が含まれています：
+
+```json
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "cross-origin"
+        }
+      ]
+    }
+  ]
+}
+```
+
+これにより、SharedArrayBufferが有効化され、RAR形式の展開が可能になります。
+
+### 注意事項
+
+- **GitHub Pagesとの併用**: GitHub Pagesでは引き続きRAR形式は動作しません（ZIP/EPUB/PDF/画像は動作）
+- **カスタムドメイン**: Vercelのプロジェクト設定からカスタムドメインを設定可能
+- **自動デプロイ**: GitHubリポジトリへのpush時に自動的に再デプロイされます
+
 ## ライセンス
 
 MIT License

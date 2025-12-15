@@ -16,3 +16,6 @@ Thumbs.db
 # Project specific
 .claude/
 do_prompt.md
+
+# Vercel
+.vercel
