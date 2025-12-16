@@ -1,8 +1,9 @@
 # Dependencies
 node_modules/
 
-# External libraries (for Biome ignore)
-lib/libarchive/
+# External libraries (Node.js specific files)
+lib/libarchive/build/
+lib/libarchive/*-node.mjs
 
 # Logs
 *.log
