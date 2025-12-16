@@ -1,9 +1,8 @@
 # Dependencies
 node_modules/
 
-# External libraries (Node.js specific files)
-lib/libarchive/build/
-lib/libarchive/*-node.mjs
+# External libraries (Node.js specific files and build artifacts)
+lib/libarchive/
 
 # Logs
 *.log

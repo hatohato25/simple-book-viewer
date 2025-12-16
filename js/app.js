@@ -10,14 +10,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupRecentFilesEvents();
   await renderRecentFiles();
 
-  // libarchive.jsの初期化（RAR/ZIP/7z対応）
+  // Unarchiver.jsの初期化（RAR対応）
+  // 注: libunrar.js.memファイルのパスを正しく設定するため、事前にロードする
   try {
-    Archive.init({
-      workerUrl: "lib/libarchive/worker-bundle.js",
-    });
-    console.log("[Init] libarchive.js（RAR/ZIP/7z対応）を初期化しました");
+    await Unarchiver.load(["rar"]);
+    console.log("[Init] RAR形式のサポートを初期化しました");
   } catch (error) {
-    console.warn("[Init] libarchive.jsの初期化に失敗しました:", error);
+    console.warn("[Init] RAR形式の初期化に失敗しました:", error);
   }
 });
 
