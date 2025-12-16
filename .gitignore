@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# External libraries (for Biome ignore)
+lib/libarchive/
+
 # Logs
 *.log
 npm-debug.log*

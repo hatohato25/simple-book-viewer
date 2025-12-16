@@ -10,17 +10,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupRecentFilesEvents();
   await renderRecentFiles();
 
-  // SharedArrayBufferの確認
-  console.log("[Init] SharedArrayBuffer:", typeof SharedArrayBuffer !== 'undefined');
-  console.log("[Init] crossOriginIsolated:", self.crossOriginIsolated);
-
-  // Unarchiver.jsの初期化（RAR対応）
-  // 注: libunrar.js.memファイルのパスを正しく設定するため、事前にロードする
+  // libarchive.jsの初期化（RAR/ZIP/7z対応）
   try {
-    await Unarchiver.load(["rar"]);
-    console.log("[Init] RAR形式のサポートを初期化しました");
+    Archive.init({
+      workerUrl: "lib/libarchive/worker-bundle.js",
+    });
+    console.log("[Init] libarchive.js（RAR/ZIP/7z対応）を初期化しました");
   } catch (error) {
-    console.warn("[Init] RAR形式の初期化に失敗しました:", error);
+    console.warn("[Init] libarchive.jsの初期化に失敗しました:", error);
   }
 });
 

@@ -176,49 +176,50 @@ async function extractImagesFromZip(zipFile) {
 // biome-ignore lint/correctness/noUnusedVariables: グローバル関数として他のモジュールから使用
 async function extractImagesFromRar(rarFile) {
   try {
-    // Unarchiver.jsを使用してRARファイルを開く
-    // 注: GitHub Pagesなどの静的ホスティングでは、SharedArrayBufferが利用できないため
-    // マルチスレッド版のWASMが動作しない場合があります
-    const archive = await Unarchiver.open(rarFile);
+    // libarchive.jsを使用してRARファイルを開く
+    const archive = await Archive.open(rarFile);
     const imageFiles = [];
 
-    // アーカイブ内のすべてのエントリを走査
-    for (const entry of archive.entries) {
-      // ディレクトリはスキップ
-      if (!entry.is_file) continue;
+    // ファイル一覧を取得
+    const filesObj = await archive.getFilesObject();
 
-      // 画像ファイルかチェック
-      const lowerFilename = entry.name.toLowerCase();
-      const isImage = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"].some(
-        (ext) => lowerFilename.endsWith(ext),
-      );
+    // 再帰的にファイルを探索
+    async function processFiles(obj, basePath = "") {
+      for (const [name, entry] of Object.entries(obj)) {
+        const fullPath = basePath ? `${basePath}/${name}` : name;
 
-      if (isImage) {
-        // Fileオブジェクトとして取得
-        const file = await entry.read();
-        imageFiles.push(file);
+        if (entry.extract) {
+          // ファイルの場合
+          const lowerFilename = fullPath.toLowerCase();
+          const isImage = [
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".gif",
+            ".webp",
+            ".avif",
+          ].some((ext) => lowerFilename.endsWith(ext));
+
+          if (isImage) {
+            const file = await entry.extract();
+            imageFiles.push(file);
+          }
+        } else {
+          // ディレクトリの場合、再帰的に処理
+          await processFiles(entry, fullPath);
+        }
       }
     }
+
+    await processFiles(filesObj);
 
     console.log(`[RAR] ${imageFiles.length}個の画像ファイルを展開しました`);
     return imageFiles;
   } catch (error) {
     console.error("[RAR] RAR展開エラー:", error);
-
-    // pthread関連のエラーの場合は、より詳しいエラーメッセージを投げる
-    const errorMessage = error?.message || String(error);
-    if (errorMessage.includes("pthread") || errorMessage.includes("abort")) {
-      const detailedError = new Error(
-        "RAR展開機能は現在の環境では利用できません。\n" +
-          "代わりにZIP形式をご利用ください。\n\n" +
-          "技術的詳細: WebAssemblyのマルチスレッド機能が利用できないため、" +
-          "RAR形式のファイル展開ができません。",
-      );
-      detailedError.name = "RarNotSupportedError";
-      throw detailedError;
-    }
-
-    throw error;
+    throw new Error(
+      "RARファイルの処理に失敗しました。\n\nZIP形式での再試行をお勧めします。",
+    );
   }
 }
 
