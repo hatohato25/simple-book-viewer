@@ -6,7 +6,9 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": false
+    "ignoreUnknown": false,
+    "includes": ["**/*.js", "**/*.ts", "**/*.jsx", "**/*.tsx"],
+    "experimentalScannerIgnores": ["lib/**"]
   },
   "formatter": {
     "enabled": true,

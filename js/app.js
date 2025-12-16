@@ -96,19 +96,8 @@ function handleDragLeave(e) {
   elements.dropZone.classList.remove("dragover");
 }
 
-// ドロップ
-async function handleDrop(e) {
-  e.preventDefault();
-  elements.dropZone.classList.remove("dragover");
-
-  const items = e.dataTransfer.items;
-  if (!items || items.length === 0) {
-    return;
-  }
-
-  // ファイルを収集
-  const files = await collectDroppedFiles(items);
-
+// ファイル種別に応じて処理を振り分ける共通関数
+async function processFiles(files) {
   if (files.length === 0) {
     alert("ファイルが見つかりませんでした。");
     return;
@@ -142,40 +131,27 @@ async function handleDrop(e) {
   }
 }
 
+// ドロップ
+async function handleDrop(e) {
+  e.preventDefault();
+  elements.dropZone.classList.remove("dragover");
+
+  const items = e.dataTransfer.items;
+  if (!items || items.length === 0) {
+    return;
+  }
+
+  // ファイルを収集して処理
+  const files = await collectDroppedFiles(items);
+  await processFiles(files);
+}
+
 // ファイル選択（input type="file"）
 async function handleFileInputChange(e) {
   const files = Array.from(e.target.files);
 
-  if (files.length === 0) {
-    return;
-  }
-
-  // ファイル種別を判定
-  const fileType = detectFileType(files);
-
-  // ファイル種別に応じて処理を振り分け
-  switch (fileType) {
-    case "image":
-      await handleImageFiles(files);
-      break;
-    case "pdf":
-      await handlePdfFile(files[0]);
-      break;
-    case "epub":
-      await handleEpubFile(files[0]);
-      break;
-    case "zip":
-      await handleZipFile(files[0]);
-      break;
-    case "rar":
-      await handleRarFile(files[0]);
-      break;
-    default:
-      alert(
-        "対応していないファイル形式です。\n\n対応形式: 画像ファイル (JPG, PNG, GIF, WebP, AVIF), PDFファイル, EPUBファイル, ZIP/RARファイル",
-      );
-      break;
-  }
+  // ファイルを処理
+  await processFiles(files);
 
   // inputをリセット（同じファイルを再選択できるように）
   e.target.value = "";
