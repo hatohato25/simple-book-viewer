@@ -96,6 +96,21 @@ function handleDragLeave(e) {
   elements.dropZone.classList.remove("dragover");
 }
 
+// Loading表示/非表示
+function showLoading() {
+  const loading = document.getElementById("loading");
+  if (loading) {
+    loading.classList.remove("hidden");
+  }
+}
+
+function hideLoading() {
+  const loading = document.getElementById("loading");
+  if (loading) {
+    loading.classList.add("hidden");
+  }
+}
+
 // ファイル種別に応じて処理を振り分ける共通関数
 async function processFiles(files) {
   if (files.length === 0) {
@@ -103,31 +118,39 @@ async function processFiles(files) {
     return;
   }
 
-  // ファイル種別を判定
-  const fileType = detectFileType(files);
+  // ファイル読み込み開始時にloading表示
+  showLoading();
 
-  // ファイル種別に応じて処理を振り分け
-  switch (fileType) {
-    case "image":
-      await handleImageFiles(files);
-      break;
-    case "pdf":
-      await handlePdfFile(files[0]);
-      break;
-    case "epub":
-      await handleEpubFile(files[0]);
-      break;
-    case "zip":
-      await handleZipFile(files[0]);
-      break;
-    case "rar":
-      await handleRarFile(files[0]);
-      break;
-    default:
-      alert(
-        "対応していないファイル形式です。\n\n対応形式: 画像ファイル (JPG, PNG, GIF, WebP, AVIF), PDFファイル, EPUBファイル, ZIP/RARファイル",
-      );
-      break;
+  try {
+    // ファイル種別を判定
+    const fileType = detectFileType(files);
+
+    // ファイル種別に応じて処理を振り分け
+    switch (fileType) {
+      case "image":
+        await handleImageFiles(files);
+        break;
+      case "pdf":
+        await handlePdfFile(files[0]);
+        break;
+      case "epub":
+        await handleEpubFile(files[0]);
+        break;
+      case "zip":
+        await handleZipFile(files[0]);
+        break;
+      case "rar":
+        await handleRarFile(files[0]);
+        break;
+      default:
+        alert(
+          "対応していないファイル形式です。\n\n対応形式: 画像ファイル (JPG, PNG, GIF, WebP, AVIF), PDFファイル, EPUBファイル, ZIP/RARファイル",
+        );
+        break;
+    }
+  } finally {
+    // エラー時も必ずloading非表示
+    hideLoading();
   }
 }
 
